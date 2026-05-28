@@ -186,8 +186,9 @@ body{background:var(--bg);color:var(--txt);font-family:'Lato',sans-serif;font-we
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────
-var API_URL = localStorage.getItem('het_config') ? JSON.parse(localStorage.getItem('het_config')).apiUrl : '';
-var API_SENHA = localStorage.getItem('het_config') ? JSON.parse(localStorage.getItem('het_config')).senha : '';
+// Configuracao fixa da API
+var API_URL   = 'https://script.google.com/macros/s/AKfycbwuru596Iqn4jjEAaPPIkTG6ZvQ5wg83jR60YrFcR9SEFv1W4-S4ZrEeUlJPrGAnJuJ/exec';
+var API_SENHA = 'haraset2025';
 var PIX_CHAVE = '07209729496';
 var PIX_NOME  = 'Haras ET';
 
@@ -213,12 +214,7 @@ function limparDoc(v){
 
 // ── API ──────────────────────────────────────────────────────
 function api(acao, tabela, dados){
-  if(!API_URL){
-    // Tenta ler de novo do localStorage
-    var cfg = localStorage.getItem('het_config');
-    if(cfg){ var c=JSON.parse(cfg); API_URL=c.apiUrl||''; API_SENHA=c.senha||''; }
-  }
-  if(!API_URL) return Promise.reject(new Error('API não configurada'));
+  if(!API_URL) return Promise.reject(new Error('API nao configurada'));
   return fetch(API_URL,{
     method:'POST', redirect:'follow',
     headers:{'Content-Type':'text/plain'},
