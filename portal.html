@@ -208,7 +208,7 @@ function toast(msg){
 }
 
 function limparDoc(v){
-  return v.replace(/\D/g,'');
+  return String(v||'').replace(/[^0-9]/g,'');
 }
 
 // ── API ──────────────────────────────────────────────────────
@@ -236,10 +236,21 @@ function entrar(){
   showLoading('Buscando cadastro...');
   api('listar','Clientes').then(function(clientes){
     var rawLimpo = limparDoc(raw);
+    console.log('Buscando:', rawLimpo, 'Total clientes:', clientes.length);
     var cliente = clientes.find(function(c){
-      var telLimpo = limparDoc(c.tel||'');
-      var docLimpo = limparDoc(c.doc||'');
-      return (rawLimpo && (telLimpo === rawLimpo || docLimpo === rawLimpo));
+      var telLimpo = limparDoc(String(c.tel||''));
+      var docLimpo = limparDoc(String(c.doc||''));
+      console.log('Cliente:', c.nome, '| tel:', telLimpo, '| doc:', docLimpo);
+      // Remove 55 do inicio se houver
+      var telSem55 = telLimpo.length > 11 && telLimpo.startsWith('55') ? telLimpo.slice(2) : telLimpo;
+      var rawSem55 = rawLimpo.length > 11 && rawLimpo.startsWith('55') ? rawLimpo.slice(2) : rawLimpo;
+      return rawLimpo.length >= 8 && (
+        telLimpo === rawLimpo ||
+        telSem55 === rawSem55 ||
+        telSem55 === rawLimpo ||
+        telLimpo === rawSem55 ||
+        docLimpo === rawLimpo
+      );
     });
     if(!cliente){
       hideLoading(); mostrarErro('Código de acesso inválido.'); return;

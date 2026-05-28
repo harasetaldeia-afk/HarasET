@@ -539,18 +539,20 @@ async function loadClientes(q=''){
   loading('Carregando clientes...');
   try {
     const list = await api('listar','Clientes');
-    cache.clientes=list; hideLoading(); renderClientes(q);
+    cache.clientes = Array.isArray(list) ? list : [];
+    hideLoading();
+    renderClientes(q);
   } catch(e){ hideLoading(); toast('Erro: '+e.message,'err'); }
 }
 
 function renderClientes(q=''){
-  const list=cache.clientes.filter(c=>!q||c.nome.toLowerCase().includes(q.toLowerCase()));
+  const list=cache.clientes.filter(c=>c&&c.id&&(!q||String(c.nome||'').toLowerCase().includes(q.toLowerCase())));
   const tbody=document.getElementById('clientes-tbody');
   const empty=document.getElementById('clientes-empty');
   if(!list.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
   tbody.innerHTML=list.map(c=>`<tr>
-    <td>${c.nome}</td><td>${c.tel||'—'}</td><td>${c.cidade||'—'}${c.uf?' · '+c.uf:''}</td>
+    <td>${c.nome||'—'}</td><td>${c.tel||'—'}</td><td>${c.cidade||'—'}${c.uf?' · '+c.uf:''}</td>
     <td><button class="btn btn-ghost btn-sm" onclick="editCliente('${c.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="delCliente('${c.id}','${c.nome}')">🗑</button></td>
   </tr>`).join('');
 }
