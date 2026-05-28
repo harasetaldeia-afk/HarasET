@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Haras ET · Portal do Cliente</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --gold:#c9a84c;--gold-l:#e8c97e;--gold-d:#7a5c18;
+  --red:#8b1a1a;--red-b:#c0392b;
+  --bg:#0a0a0a;--bg2:#111;--card:#161616;--card2:#1e1e1e;
+  --border:rgba(201,168,76,0.15);--border2:rgba(255,255,255,0.06);
+  --txt:#f0ebe0;--txt2:#a89880;--txt3:#6b5f4e;
+  --green:#2ecc71;--orange:#e67e22;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Lato',sans-serif;font-weight:300;min-height:100vh}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:var(--bg)}
+.login-wrap{width:100%;max-width:400px}
+.login-logo-wrap{text-align:center;margin-bottom:2.5rem}
+.login-logo-wrap img{width:90px;height:90px;object-fit:cover;border-radius:50%;border:2px solid rgba(201,168,76,0.4);box-shadow:0 0 40px rgba(201,168,76,0.15)}
+.login-logo-wrap h1{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);letter-spacing:.2em;margin-top:1rem}
+.login-logo-wrap p{font-size:.65rem;color:var(--txt3);letter-spacing:.3em;margin-top:.3rem}
+.login-box{background:var(--bg2);border:1px solid var(--border);padding:2.5rem}
+.login-box .form-group{margin-bottom:1.2rem}
+.login-box label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.25em;color:var(--txt3);display:block;margin-bottom:.5rem;text-transform:uppercase}
+.login-box input{width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--txt);padding:.9rem 1rem;font-family:'Lato',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s}
+.login-box input:focus{border-color:var(--gold)}
+.login-btn{width:100%;background:var(--gold);color:var(--bg);font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.25em;padding:1rem;border:none;cursor:pointer;transition:all .2s;margin-top:.5rem;font-weight:700}
+.login-btn:hover{background:var(--gold-l)}
+.login-error{color:var(--red-b);font-size:.75rem;margin-top:.8rem;text-align:center;font-family:'Cinzel',serif;letter-spacing:.1em;display:none}
+.login-hint{font-size:.72rem;color:var(--txt3);text-align:center;margin-top:1.2rem;line-height:1.6}
+
+/* ── PORTAL ── */
+#portal{display:none;min-height:100vh}
+#portal.visible{display:block}
+
+/* HEADER */
+.portal-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.portal-header-left{display:flex;align-items:center;gap:.8rem}
+.portal-header-left img{width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(201,168,76,0.3)}
+.portal-header-left h2{font-family:'Cinzel',serif;font-size:.85rem;color:var(--gold);letter-spacing:.1em}
+.portal-header-left p{font-size:.68rem;color:var(--txt3);margin-top:.1rem}
+.sair-btn{background:none;border:1px solid var(--border2);color:var(--txt3);font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.15em;padding:.4rem .9rem;cursor:pointer;transition:all .2s}
+.sair-btn:hover{border-color:var(--red-b);color:var(--red-b)}
+
+/* CONTENT */
+.portal-content{max-width:700px;margin:0 auto;padding:2rem 1.5rem}
+
+/* WELCOME CARD */
+.welcome-card{background:var(--card);border:1px solid var(--border);padding:2rem;margin-bottom:2rem;position:relative;overflow:hidden}
+.welcome-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--red),var(--gold))}
+.welcome-card h3{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);letter-spacing:.1em;margin-bottom:.4rem}
+.welcome-card p{font-size:.82rem;color:var(--txt2);line-height:1.7}
+
+/* RESUMO */
+.resumo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-bottom:2rem}
+.resumo-card{background:var(--card);border:1px solid var(--border2);padding:1.5rem;text-align:center}
+.resumo-card .r-label{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.2em;color:var(--txt3);text-transform:uppercase;margin-bottom:.5rem}
+.resumo-card .r-value{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--gold);line-height:1}
+.resumo-card.green .r-value{color:var(--green)}
+.resumo-card.orange .r-value{color:var(--orange)}
+
+/* FATURAS */
+.section-title{font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1rem;text-transform:uppercase}
+.fatura-card{background:var(--card);border:1px solid var(--border2);margin-bottom:1px;transition:border-color .2s}
+.fatura-card:hover{border-color:var(--border)}
+.fatura-header{padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:1rem}
+.fatura-header-left h4{font-size:.88rem;color:var(--txt);margin-bottom:.3rem}
+.fatura-header-left p{font-size:.72rem;color:var(--txt2)}
+.fatura-header-right{text-align:right;flex-shrink:0}
+.fatura-valor{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold)}
+.fatura-venc{font-size:.68rem;color:var(--txt3);margin-top:.2rem}
+.badge{display:inline-block;padding:.2rem .6rem;font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;margin-top:.3rem}
+.badge-pago{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
+.badge-pendente{background:rgba(230,126,34,.12);color:var(--orange);border:1px solid rgba(230,126,34,.3)}
+.fatura-body{display:none;border-top:1px solid var(--border2);padding:1.5rem}
+.fatura-body.open{display:block}
+
+/* ITENS */
+.itens-table{width:100%;border-collapse:collapse;margin-bottom:1.2rem}
+.itens-table th{font-family:'Cinzel',serif;font-size:.55rem;letter-spacing:.15em;color:var(--txt3);padding:.5rem .8rem;border-bottom:1px solid var(--border2);text-align:left}
+.itens-table td{padding:.6rem .8rem;font-size:.8rem;color:var(--txt2);border-bottom:1px solid rgba(255,255,255,.03)}
+.itens-table .total-row td{color:var(--gold);font-family:'Cinzel',serif;border-top:1px solid var(--border2);border-bottom:none}
+
+/* PIX BOX */
+.pix-box{background:var(--card2);border:1px solid rgba(201,168,76,0.25);padding:1.5rem;text-align:center}
+.pix-box h4{font-family:'Cinzel',serif;font-size:.75rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1rem}
+.pix-qr{background:#fff;padding:12px;display:inline-block;margin-bottom:1rem}
+.pix-qr img{width:160px;height:160px;display:block}
+.pix-chave{background:var(--card);border:1px solid var(--border2);padding:.8rem 1.2rem;font-family:'Cinzel',serif;font-size:.78rem;color:var(--gold);letter-spacing:.1em;margin-bottom:.8rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.copy-btn{background:var(--gold);color:var(--bg);border:none;font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.15em;padding:.4rem .8rem;cursor:pointer;transition:all .2s;font-weight:700}
+.copy-btn:hover{background:var(--gold-l)}
+.pix-nome{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;color:var(--txt3);margin-bottom:.5rem}
+.pix-valor-info{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);margin-bottom:1rem}
+.pix-instructions{font-size:.75rem;color:var(--txt2);line-height:1.7;margin-top:.8rem}
+.pix-instructions strong{color:var(--txt)}
+
+/* PDF BTN */
+.fatura-actions{display:flex;gap:.8rem;margin-top:1rem;flex-wrap:wrap}
+.btn{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.15em;padding:.6rem 1.2rem;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.4rem}
+.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold)}.btn-outline:hover{background:rgba(201,168,76,.1)}
+.btn-ghost{background:transparent;color:var(--txt2);border:1px solid var(--border2)}.btn-ghost:hover{color:var(--txt)}
+
+/* EMPTY */
+.empty{text-align:center;padding:3rem;color:var(--txt3)}
+.empty .e-icon{font-size:2rem;margin-bottom:.8rem}
+.empty p{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.2em}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--gold);color:var(--bg);padding:.8rem 1.2rem;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* LOADING */
+.loading{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
+.loading.show{display:flex}
+.spinner{width:36px;height:36px;border:3px solid rgba(201,168,76,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+.loading p{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.2em;color:var(--gold)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* CHEVRON */
+.chevron{color:var(--txt3);font-size:.9rem;transition:transform .2s;flex-shrink:0}
+.chevron.open{transform:rotate(180deg)}
+
+@media(max-width:480px){
+  .resumo-grid{grid-template-columns:1fr 1fr}
+  .resumo-grid .resumo-card:last-child{grid-column:span 2}
+  .portal-content{padding:1.2rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-logo-wrap">
+      <img src="logo.jpg" alt="Haras ET"/>
+      <h1>Haras ET</h1>
+      <p>Portal do Cliente</p>
+    </div>
+    <div class="login-box">
+      <div class="form-group">
+        <label>Código de Acesso</label>
+        <input type="text" id="login-input" placeholder="Digite seu código de acesso" onkeydown="if(event.key==='Enter')entrar()"/>
+      </div>
+      <button class="login-btn" onclick="entrar()">Acessar Minhas Faturas</button>
+      <div class="login-error" id="login-error">Código de acesso inválido.</div>
+      <p class="login-hint">Código fornecido pelo Haras ET</p>
+    </div>
+  </div>
+</div>
+
+<!-- PORTAL -->
+<div id="portal">
+  <header class="portal-header">
+    <div class="portal-header-left">
+      <img src="logo.jpg" alt="Haras ET"/>
+      <div>
+        <h2>Haras ET</h2>
+        <p id="portal-cliente-nome">Carregando...</p>
+      </div>
+    </div>
+    <button class="sair-btn" onclick="sair()">Sair</button>
+  </header>
+
+  <div class="portal-content">
+    <div class="welcome-card">
+      <h3>Bem-vindo, <span id="welcome-nome"></span>!</h3>
+      <p>Aqui você acompanha suas faturas, vencimentos e realiza pagamentos via PIX com facilidade.</p>
+    </div>
+
+    <div class="resumo-grid" id="resumo-grid"></div>
+
+    <div class="section-title">Suas Faturas</div>
+    <div id="faturas-list"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="loading" id="loading"><div class="spinner"></div><p id="loading-msg">Aguarde...</p></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+var API_URL = localStorage.getItem('het_config') ? JSON.parse(localStorage.getItem('het_config')).apiUrl : '';
+var API_SENHA = localStorage.getItem('het_config') ? JSON.parse(localStorage.getItem('het_config')).senha : '';
+var PIX_CHAVE = '07209729496';
+var PIX_NOME  = 'Haras ET';
+
+var clienteAtual = null;
+var faturasCliente = [];
+
+// ── HELPERS ──────────────────────────────────────────────────
+function fmtMoney(v){ return 'R$ '+parseFloat(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+function fmtDate(d){ if(!d||d==='')return '—'; var p=String(d).split('-'); if(p.length<3)return d; return p[2]+'/'+p[1]+'/'+p[0]; }
+
+function showLoading(msg){ document.getElementById('loading-msg').textContent=msg||'Aguarde...'; document.getElementById('loading').classList.add('show'); }
+function hideLoading(){ document.getElementById('loading').classList.remove('show'); }
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+function limparDoc(v){
+  return v.replace(/\D/g,'');
+}
+
+// ── API ──────────────────────────────────────────────────────
+function api(acao, tabela, dados){
+  if(!API_URL){
+    // Tenta ler de novo do localStorage
+    var cfg = localStorage.getItem('het_config');
+    if(cfg){ var c=JSON.parse(cfg); API_URL=c.apiUrl||''; API_SENHA=c.senha||''; }
+  }
+  if(!API_URL) return Promise.reject(new Error('API não configurada'));
+  return fetch(API_URL,{
+    method:'POST', redirect:'follow',
+    headers:{'Content-Type':'text/plain'},
+    body:JSON.stringify({senha:API_SENHA, acao:acao, tabela:tabela, dados:dados||{}, id:(dados&&dados.id)||''})
+  }).then(function(r){ return r.json(); }).then(function(j){
+    if(!j.ok) throw new Error(j.erro||'Erro');
+    return j.rows || j.row || j;
+  });
+}
+
+// ── LOGIN ────────────────────────────────────────────────────
+function entrar(){
+  var raw = document.getElementById('login-input').value.trim();
+  if(!raw){ mostrarErro('Digite seu CPF ou telefone'); return; }
+  showLoading('Buscando cadastro...');
+  api('listar','Clientes').then(function(clientes){
+    var rawLimpo = limparDoc(raw);
+    var cliente = clientes.find(function(c){
+      var telLimpo = limparDoc(c.tel||'');
+      var docLimpo = limparDoc(c.doc||'');
+      return (rawLimpo && (telLimpo === rawLimpo || docLimpo === rawLimpo));
+    });
+    if(!cliente){
+      hideLoading(); mostrarErro('Código de acesso inválido.'); return;
+    }
+    clienteAtual = cliente;
+    return api('listar','Faturas').then(function(faturas){
+      faturasCliente = faturas.filter(function(f){ return String(f.clienteId)===String(cliente.id); });
+      hideLoading(); abrirPortal();
+    });
+  }).catch(function(e){ hideLoading(); mostrarErro('Erro de conexão. Tente novamente.'); console.error(e); });
+}
+
+function mostrarErro(msg){
+  var el=document.getElementById('login-error');
+  el.textContent=msg; el.style.display='block';
+  setTimeout(function(){ el.style.display='none'; }, 3000);
+}
+
+function sair(){
+  clienteAtual=null; faturasCliente=[];
+  document.getElementById('portal').classList.remove('visible');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-input').value='';
+}
+
+// ── PORTAL ───────────────────────────────────────────────────
+function abrirPortal(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('portal').classList.add('visible');
+  var nome = clienteAtual.nome.split(' ')[0];
+  document.getElementById('portal-cliente-nome').textContent = clienteAtual.nome;
+  document.getElementById('welcome-nome').textContent = nome;
+  renderResumo();
+  renderFaturas();
+}
+
+function renderResumo(){
+  var total   = faturasCliente.reduce(function(s,f){ return s+parseFloat(f.total||0); },0);
+  var pago    = faturasCliente.filter(function(f){ return f.status==='pago'; }).reduce(function(s,f){ return s+parseFloat(f.total||0); },0);
+  var pend    = faturasCliente.filter(function(f){ return f.status==='pendente'; }).reduce(function(s,f){ return s+parseFloat(f.total||0); },0);
+  document.getElementById('resumo-grid').innerHTML =
+    '<div class="resumo-card"><div class="r-label">Total</div><div class="r-value">'+fmtMoney(total)+'</div></div>'+
+    '<div class="resumo-card green"><div class="r-label">Pago</div><div class="r-value">'+fmtMoney(pago)+'</div></div>'+
+    '<div class="resumo-card orange"><div class="r-label">Pendente</div><div class="r-value">'+fmtMoney(pend)+'</div></div>';
+}
+
+function renderFaturas(){
+  var container = document.getElementById('faturas-list');
+  if(!faturasCliente.length){
+    container.innerHTML='<div class="empty"><div class="e-icon">📄</div><p>Nenhuma fatura encontrada</p></div>';
+    return;
+  }
+  var sorted = faturasCliente.slice().sort(function(a,b){ return parseInt(b.num)-parseInt(a.num); });
+  container.innerHTML = sorted.map(function(f,idx){
+    var isPend = f.status==='pendente';
+    return '<div class="fatura-card" id="fc-'+idx+'">'+
+      '<div class="fatura-header" onclick="toggleFatura('+idx+')">'+
+        '<div class="fatura-header-left">'+
+          '<h4>Fatura #'+String(f.num).padStart(4,'0')+'</h4>'+
+          '<p>'+f.forma+'  ·  Emissão: '+fmtDate(f.emissao)+'</p>'+
+          '<span class="badge badge-'+f.status+'">'+f.status+'</span>'+
+        '</div>'+
+        '<div class="fatura-header-right">'+
+          '<div class="fatura-valor">'+fmtMoney(f.total)+'</div>'+
+          '<div class="fatura-venc">Venc: '+fmtDate(f.vencimento)+'</div>'+
+        '</div>'+
+        '<div class="chevron" id="chev-'+idx+'">▼</div>'+
+      '</div>'+
+      '<div class="fatura-body" id="fb-'+idx+'">'+
+        renderItens(f)+
+        (isPend ? renderPix(f) : '<div style="text-align:center;padding:.5rem;font-family:Cinzel,serif;font-size:.7rem;color:var(--green)">✓ Esta fatura já foi paga. Obrigado!</div>')+
+        '<div class="fatura-actions">'+
+          '<button class="btn btn-ghost" onclick="gerarPDF(\''+f.id+'\','+idx+')">📄 Baixar Fatura PDF</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function toggleFatura(idx){
+  var body  = document.getElementById('fb-'+idx);
+  var chev  = document.getElementById('chev-'+idx);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+function renderItens(f){
+  // Tenta parsear itens se for string JSON
+  var items = f.items || [];
+  if(typeof items === 'string'){ try{ items=JSON.parse(items); }catch(e){ items=[]; } }
+  if(!items.length) return '';
+  return '<table class="itens-table">'+
+    '<thead><tr><th>Descrição</th><th>Qtd</th><th>Valor Unit.</th><th>Total</th></tr></thead>'+
+    '<tbody>'+
+    items.map(function(i){
+      return '<tr><td>'+i.desc+'</td><td>'+i.qty+'</td><td>'+fmtMoney(i.price)+'</td><td>'+fmtMoney(i.total)+'</td></tr>';
+    }).join('')+
+    '<tr class="total-row"><td colspan="3">Total</td><td>'+fmtMoney(f.total)+'</td></tr>'+
+    '</tbody></table>';
+}
+
+function renderPix(f){
+  var chave = PIX_CHAVE;
+  var valor = parseFloat(f.total||0).toFixed(2);
+  var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(gerarPayloadPix(chave, PIX_NOME, valor, 'Fatura'+f.num));
+  return '<div class="pix-box">'+
+    '<h4>Pagar via PIX</h4>'+
+    '<p class="pix-nome">Favorecido: <strong style="color:var(--txt)">'+PIX_NOME+'</strong></p>'+
+    '<p class="pix-valor-info">'+fmtMoney(f.total)+'</p>'+
+    '<div class="pix-qr"><img src="'+qrUrl+'" alt="QR Code PIX"/></div>'+
+    '<div class="pix-chave">'+
+      '<span>'+chave+'</span>'+
+      '<button class="copy-btn" onclick="copiarChave(\''+chave+'\')">Copiar</button>'+
+    '</div>'+
+    '<div class="pix-instructions">'+
+      '<strong>Como pagar:</strong><br>'+
+      '1. Abra o app do seu banco<br>'+
+      '2. Escaneie o QR Code ou copie a chave PIX<br>'+
+      '3. Confirme o valor de <strong>'+fmtMoney(f.total)+'</strong><br>'+
+      '4. Envie o comprovante via WhatsApp ao Haras ET'+
+    '</div>'+
+  '</div>';
+}
+
+// ── PIX PAYLOAD (BR Code) ────────────────────────────────────
+function gerarPayloadPix(chave, nome, valor, descricao){
+  function campo(id, valor){
+    var v = String(valor);
+    var len = String(v.length).padStart(2,'0');
+    return id+len+v;
+  }
+  var merchantAccountInfo = campo('00','BR.GOV.BCB.PIX') + campo('01', chave);
+  if(descricao) merchantAccountInfo += campo('02', descricao.substring(0,25));
+  var payload =
+    campo('00','01') +
+    campo('26', merchantAccountInfo) +
+    campo('52','0000') +
+    campo('53','986') +
+    campo('54', valor) +
+    campo('58','BR') +
+    campo('59', nome.substring(0,25)) +
+    campo('60','Recife') +
+    campo('62', campo('05','***')) +
+    '6304';
+  var crc = calcCRC16(payload);
+  return payload + crc;
+}
+
+function calcCRC16(str){
+  var crc = 0xFFFF;
+  for(var i=0;i<str.length;i++){
+    crc ^= str.charCodeAt(i)<<8;
+    for(var j=0;j<8;j++){
+      if(crc&0x8000) crc=(crc<<1)^0x1021;
+      else crc<<=1;
+      crc&=0xFFFF;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4,'0');
+}
+
+function copiarChave(chave){
+  navigator.clipboard.writeText(chave).then(function(){ toast('Chave PIX copiada!'); }).catch(function(){
+    var el=document.createElement('textarea'); el.value=chave;
+    document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+    toast('Chave PIX copiada!');
+  });
+}
+
+// ── PDF ──────────────────────────────────────────────────────
+function gerarPDF(faturaId, idx){
+  var f = faturasCliente.find(function(x){ return x.id===faturaId; });
+  if(!f){ toast('Fatura não encontrada'); return; }
+  var items = f.items||[];
+  if(typeof items==='string'){ try{ items=JSON.parse(items); }catch(e){ items=[]; } }
+  var {jsPDF}=window.jspdf;
+  var doc=new jsPDF();
+  var gold=[201,168,76],dark=[10,10,10],gray=[60,55,50],lgray=[200,195,188];
+  doc.setFillColor(...dark); doc.rect(0,0,210,40,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(...gold); doc.text('HARAS ET',14,18);
+  doc.setFontSize(8); doc.setTextColor(...lgray);
+  doc.text('Criatório Mangalarga Marchador · Marcha Picada',14,24);
+  doc.text('Aldeia · Pernambuco · Brasil · @haras_et',14,30);
+  doc.setFillColor(...gold); doc.rect(145,8,55,22,'F');
+  doc.setTextColor(...dark); doc.setFontSize(14); doc.text('FATURA',147,18);
+  doc.setFontSize(10); doc.text('#'+String(f.num).padStart(4,'0'),147,25);
+  doc.setDrawColor(...gold); doc.setLineWidth(0.5); doc.line(0,40,210,40);
+  var y=50;
+  doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...gold);
+  doc.text('CLIENTE',14,y); doc.text('EMISSÃO',100,y); doc.text('VENCIMENTO',145,y); y+=5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...gray);
+  doc.text(clienteAtual.nome,14,y); doc.text(clienteAtual.tel||'',14,y+5);
+  doc.text(fmtDate(f.emissao),100,y); doc.text(fmtDate(f.vencimento),145,y);
+  doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...gold); doc.text('FORMA',100,y+10);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...gray); doc.text(f.forma||'',100,y+15);
+  y+=24;
+  doc.setFillColor(...dark); doc.rect(14,y,182,7,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...gold);
+  doc.text('DESCRIÇÃO',16,y+5); doc.text('QTD',118,y+5); doc.text('UNIT.',136,y+5); doc.text('TOTAL',168,y+5); y+=10;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  items.forEach(function(item,idx){
+    if(idx%2===0){ doc.setFillColor(248,245,240); doc.rect(14,y-4,182,7,'F'); }
+    doc.setTextColor(...gray);
+    doc.text(String(item.desc||''),16,y+1,{maxWidth:98});
+    doc.text(String(item.qty),120,y+1); doc.text(fmtMoney(item.price),136,y+1); doc.text(fmtMoney(item.total),168,y+1);
+    y+=8;
+  });
+  y+=4; doc.setDrawColor(...gold); doc.setLineWidth(0.3); doc.line(14,y,196,y); y+=6;
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...dark); doc.text('TOTAL:',138,y);
+  doc.setTextColor(gold[0],gold[1],gold[2]); doc.text(fmtMoney(f.total),160,y);
+  if(f.status==='pago'){ doc.setFillColor(46,204,113); doc.rect(14,y-6,32,10,'F'); doc.setTextColor(255,255,255); doc.setFontSize(8); doc.text('PAGO',17,y+1); }
+  // PIX info
+  if(f.status==='pendente'){
+    y+=14;
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...gold); doc.text('PAGAMENTO VIA PIX',14,y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...gray);
+    doc.text('Chave PIX: '+PIX_CHAVE+'  ·  Favorecido: '+PIX_NOME,14,y);
+  }
+  doc.setFillColor(...dark); doc.rect(0,272,210,25,'F');
+  doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...lgray);
+  doc.text('Haras ET · Criatório Mangalarga Marchador · @haras_et · Aldeia - PE',105,281,{align:'center'});
+  doc.setTextColor(...gold); doc.text('Obrigado pela confiança!',105,287,{align:'center'});
+  doc.save('Fatura_HarasET_'+f.num+'.pdf');
+  toast('PDF gerado!');
+}
+</script>
+</body>
+</html>
