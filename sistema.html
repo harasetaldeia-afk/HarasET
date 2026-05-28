@@ -559,7 +559,8 @@ function filterClientes(q){ renderClientes(q); }
 async function salvarCliente(){
   const nome=document.getElementById('cli-nome').value.trim();
   if(!nome){ toast('Informe o nome','err'); return; }
-  const dados={nome,tel:document.getElementById('cli-tel').value,doc:document.getElementById('cli-doc').value,email:document.getElementById('cli-email').value,cidade:document.getElementById('cli-cidade').value,uf:document.getElementById('cli-uf').value,obs:document.getElementById('cli-obs').value};
+  var telRaw = document.getElementById('cli-tel').value.replace(/[^0-9]/g,'');
+  const dados={nome,tel:telRaw,doc:document.getElementById('cli-doc').value,email:document.getElementById('cli-email').value,cidade:document.getElementById('cli-cidade').value,uf:document.getElementById('cli-uf').value,obs:document.getElementById('cli-obs').value};
   loading('Salvando cliente...');
   try {
     await api('inserir','Clientes',dados);
@@ -621,8 +622,13 @@ async function seedClientesSheets(){
   status.textContent='Importando...';
   let ok=0;
   for(const c of lista){
-    try{ await api('inserir','Clientes',{...c,doc:'',email:'',obs:''}); ok++; status.textContent=`${ok}/${lista.length}...`; }
-    catch(e){ console.warn(e); }
+    try{
+      var cLimpo = Object.assign({}, c, {doc:'',email:'',obs:''});
+      // Limpa telefone: remove +, espacos e tracoes pra nao dar #ERROR! no Sheets
+      if(cLimpo.tel) cLimpo.tel = cLimpo.tel.replace(/[^0-9]/g,'');
+      await api('inserir','Clientes', cLimpo);
+      ok++; status.textContent=ok+'/'+lista.length+'...';
+    } catch(e){ console.warn(e); }
   }
   status.textContent=`✅ ${ok} clientes importados!`;
   toast('Clientes importados!');
