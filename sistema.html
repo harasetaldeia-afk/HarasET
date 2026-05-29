@@ -4,132 +4,81 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Haras ET · Sistema</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="theme.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="api.js"></script>
 <style>
-:root{
-  --gold:#c9a84c;--gold-l:#e8c97e;--gold-d:#7a5c18;
-  --red-b:#c0392b;--bg:#0a0a0a;--bg2:#111;--card:#161616;--card2:#1e1e1e;
-  --border:rgba(201,168,76,0.15);--b2:rgba(255,255,255,0.06);
-  --txt:#f0ebe0;--txt2:#a89880;--txt3:#6b5f4e;
-  --green:#2ecc71;--orange:#e67e22;--blue:#3498db;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--txt);font-family:'Lato',sans-serif;font-weight:300;min-height:100vh;display:flex}
-.sb{width:220px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .3s}
-.sb-logo{padding:1.8rem 1.5rem;border-bottom:1px solid var(--border)}
-.sb-logo h1{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);letter-spacing:.15em}
-.sb-logo p{font-size:.6rem;color:var(--txt3);letter-spacing:.2em;margin-top:.2rem}
-.snav{flex:1;padding:1rem 0;overflow-y:auto}
-.ni{display:flex;align-items:center;gap:.8rem;padding:.85rem 1.5rem;cursor:pointer;transition:all .2s;border-left:3px solid transparent;font-size:.82rem;color:var(--txt2)}
-.ni:hover{color:var(--gold);background:rgba(201,168,76,.04)}
-.ni.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.07)}
-.ni .ic{font-size:1rem;width:20px;text-align:center}
-.sf{padding:1rem 1.5rem;border-top:1px solid var(--border);font-size:.6rem;color:var(--txt3)}
-.sf button{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:.6rem;font-family:'Cinzel',serif;margin-top:.4rem;display:block}
-.sf button:hover{color:var(--red-b)}
-.main{margin-left:220px;flex:1;padding:2rem;min-height:100vh}
+body{display:flex;min-height:100vh;background:var(--bg)}
 .page{display:none}.page.active{display:block}
-.ph{margin-bottom:2rem}
-.ph h2{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);letter-spacing:.1em}
-.ph p{color:var(--txt2);font-size:.82rem;margin-top:.3rem}
-.dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;margin-bottom:2rem}
-.dc{background:var(--card);padding:1.8rem;border:1px solid var(--b2)}
-.dc .lbl{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.22em;color:var(--txt3);text-transform:uppercase;margin-bottom:.8rem}
-.dc .val{font-family:'Cinzel',serif;font-size:1.7rem;color:var(--gold);line-height:1}
-.dc .sub{font-size:.72rem;color:var(--txt2);margin-top:.4rem}
-.tw{background:var(--card);border:1px solid var(--b2);overflow:hidden;overflow-x:auto}
-.tw-head{padding:1.2rem 1.5rem;border-bottom:1px solid var(--b2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem}
-.tw-head h3{font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.15em;color:var(--gold)}
-table{width:100%;border-collapse:collapse;min-width:400px}
-th{font-family:'Cinzel',serif;font-size:.56rem;letter-spacing:.18em;color:var(--txt3);text-transform:uppercase;padding:.8rem 1rem;border-bottom:1px solid var(--b2);text-align:left;background:rgba(0,0,0,.2);white-space:nowrap}
-td{padding:.75rem 1rem;font-size:.8rem;color:var(--txt2);border-bottom:1px solid rgba(255,255,255,.03)}
-tr:hover td{background:rgba(255,255,255,.02);color:var(--txt)}
-.badge{display:inline-block;padding:.2rem .6rem;font-family:'Cinzel',serif;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase}
-.badge-pago{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
-.badge-pendente{background:rgba(230,126,34,.12);color:var(--orange);border:1px solid rgba(230,126,34,.3)}
-.btn{font-family:'Cinzel',serif;font-size:.62rem;letter-spacing:.18em;padding:.62rem 1.2rem;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap}
-.btn-primary{background:var(--gold);color:var(--bg);font-weight:700}.btn-primary:hover{background:var(--gold-l)}
-.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold)}.btn-outline:hover{background:rgba(201,168,76,.1)}
-.btn-danger{background:transparent;color:var(--red-b);border:1px solid rgba(192,57,43,.4)}.btn-danger:hover{background:rgba(192,57,43,.1)}
-.btn-ghost{background:transparent;color:var(--txt2);border:1px solid var(--b2)}.btn-ghost:hover{color:var(--txt)}
-.btn-green{background:rgba(46,204,113,.12);color:var(--green);border:1px solid rgba(46,204,113,.25)}.btn-green:hover{background:rgba(46,204,113,.22)}
-.btn-sm{padding:.36rem .8rem;font-size:.56rem}
-.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1rem}
-.fg{display:flex;flex-direction:column;gap:.4rem}
-.fg label{font-family:'Cinzel',serif;font-size:.57rem;letter-spacing:.18em;color:var(--txt3);text-transform:uppercase}
-.fg input,.fg select,.fg textarea{background:var(--card2);border:1px solid var(--b2);color:var(--txt);padding:.7rem .9rem;font-family:'Lato',sans-serif;font-size:.85rem;font-weight:300;outline:none;transition:border-color .2s;width:100%}
-.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--gold)}
-.fg select option{background:var(--card2)}
-.fsec{background:var(--card);border:1px solid var(--b2);padding:1.5rem;margin-bottom:1rem}
-.fsec-title{font-family:'Cinzel',serif;font-size:.7rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1.2rem;padding-bottom:.8rem;border-bottom:1px solid var(--b2);display:flex;align-items:center;justify-content:space-between}
-.lote-cli{display:flex;align-items:center;gap:1rem;padding:.9rem 1.2rem;background:var(--card);border:1px solid var(--b2);margin-bottom:2px;cursor:pointer;transition:all .2s}
-.lote-cli:hover{border-color:var(--border)}
-.lote-cli.sel{border-color:rgba(201,168,76,.4);background:rgba(201,168,76,.04)}
-.lote-cli input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px;flex-shrink:0}
-.lote-cli .lc-nome{flex:1;font-size:.85rem;color:var(--txt)}
-.lote-cli .lc-animais{font-size:.72rem;color:var(--txt2);flex:2}
-.lote-cli .lc-val{font-family:'Cinzel',serif;font-size:.9rem;color:var(--gold);flex-shrink:0}
-.lote-summary{background:rgba(201,168,76,.06);border:1px solid var(--border);padding:1rem 1.5rem;margin-bottom:1rem;display:flex;gap:2rem;flex-wrap:wrap}
-.lote-summary span{font-family:'Cinzel',serif;font-size:.65rem;letter-spacing:.15em;color:var(--txt2)}
-.lote-summary strong{color:var(--gold)}
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem}
-.mo.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border);width:100%;max-width:560px;max-height:92vh;overflow-y:auto}
-.mh{padding:1.4rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.mh h3{font-family:'Cinzel',serif;font-size:.88rem;letter-spacing:.15em;color:var(--gold)}
-.mc{padding:1.5rem}
-.mf{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:.8rem}
-.mclose{background:none;border:none;color:var(--txt2);font-size:1.2rem;cursor:pointer}
-.sbar{background:var(--card2);border:1px solid var(--b2);color:var(--txt);padding:.55rem .9rem;font-family:'Lato',sans-serif;font-size:.8rem;outline:none;width:200px;transition:border-color .2s}
-.sbar:focus{border-color:var(--gold)}
-.empty{text-align:center;padding:3rem;color:var(--txt3)}
-.empty .ei{font-size:2.5rem;margin-bottom:1rem}
-.empty p{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.2em}
-.toast{position:fixed;bottom:2rem;right:2rem;background:var(--gold);color:var(--bg);padding:.9rem 1.4rem;font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.12em;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s;max-width:300px}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.err{background:var(--red-b);color:#fff}
-.lov{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem}
-.lov.show{display:flex}
-.lsp{width:40px;height:40px;border:3px solid rgba(201,168,76,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
-.lov p{font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.2em;color:var(--gold)}
-@keyframes spin{to{transform:rotate(360deg)}}
-.mtog{display:none;position:fixed;top:1rem;left:1rem;z-index:100;background:var(--card);border:1px solid var(--border);padding:.6rem;cursor:pointer;font-size:1.2rem;color:var(--txt)}
+
+/* DASH CHARTS */
+#dash-charts-wrap{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.5rem}
+.chart-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:1.5rem}
+.chart-card h4{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1rem;text-transform:uppercase}
+
+/* LOTE */
+.lote-summary{background:#FFFBF0;border:1.5px solid var(--border2);border-radius:12px;padding:1rem 1.5rem;margin-bottom:1rem;display:flex;gap:2rem;flex-wrap:wrap}
+.lote-summary span{font-size:.8rem;color:var(--txt2)}
+.lote-summary strong{color:var(--gold);font-weight:600}
+
+/* CONFIG CATS */
+.cat-item{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;margin-bottom:.4rem}
+.cat-item .cat-nome{font-size:.9rem;color:var(--txt);font-weight:500}
+.cat-item .cat-preco{font-family:'Cinzel',serif;color:var(--gold);font-size:.95rem}
+.cat-item .cat-acoes{display:flex;gap:.4rem}
+
+/* NOVA FATURA ITEMS */
+.items-wrap table{width:100%;border-collapse:collapse}
+.items-wrap th{font-size:.62rem;letter-spacing:.15em;color:var(--txt3);text-transform:uppercase;padding:.5rem .6rem;border-bottom:1.5px solid var(--border);text-align:left;font-weight:500;background:var(--bg2)}
+.items-wrap td{padding:.4rem .4rem}
+.items-wrap input{background:var(--bg);border:1.5px solid var(--border);color:var(--txt);padding:.5rem .7rem;font-size:.85rem;width:100%;border-radius:8px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s}
+.items-wrap input:focus{border-color:var(--gold)}
+.total-bar{display:flex;justify-content:flex-end;gap:1.5rem;padding:1rem 0;border-top:1.5px solid var(--border);align-items:center}
+.total-bar span{font-size:.8rem;color:var(--txt2)}
+.total-bar strong{font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold)}
+
+/* RECENT ITEM */
+.recent-item{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;gap:1rem;transition:all .2s}
+.recent-item:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+.ri-left h4{font-size:.88rem;color:var(--txt);font-weight:500;margin-bottom:.2rem}
+.ri-left p{font-size:.72rem;color:var(--txt2)}
+.ri-right{text-align:right;flex-shrink:0}
+.ri-right .ri-val{font-family:'Cinzel',serif;font-size:1rem;color:var(--gold);font-weight:600}
+.ri-right .ri-date{font-size:.7rem;color:var(--txt3);margin-top:.15rem}
+
 @media(max-width:768px){
-  .sb{transform:translateX(-100%)}.sb.open{transform:translateX(0)}
-  .main{margin-left:0;padding:1rem}.mtog{display:block}
-  .ph{margin-top:3.5rem}.fgrid{grid-template-columns:1fr}
-  .dg{grid-template-columns:1fr 1fr}
-  #dash-charts-wrap{grid-template-columns:1fr!important}
-  .lote-cli{flex-wrap:wrap}
+  #dash-charts-wrap{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
 <button class="mtog" onclick="toggleSB()">☰</button>
-<aside class="sb" id="sidebar">
-  <div class="sb-logo"><h1>Haras ET</h1><p>Sistema · Gestão</p></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <img src="logo.jpg" alt="Haras ET"/>
+    <div><h1>Haras ET</h1><p>Sistema · Gestão</p></div>
+  </div>
   <nav class="snav">
-    <div class="ni active" onclick="goTo('dash')"><span class="ic">📊</span>Dashboard</div>
-    <div class="ni" onclick="goTo('clientes')"><span class="ic">👤</span>Clientes</div>
-    <div class="ni" onclick="goTo('animais')"><span class="ic">🐴</span>Animais</div>
-    <div class="ni" onclick="goTo('nova')"><span class="ic">➕</span>Nova Fatura</div>
-    <div class="ni" onclick="goTo('lote')"><span class="ic">📦</span>Gerar em Lote</div>
-    <div class="ni" onclick="goTo('faturas')"><span class="ic">📄</span>Faturas</div>
-    <div class="ni" onclick="goTo('pagamentos')"><span class="ic">💰</span>Pagamentos</div>
-    <div class="ni" onclick="goTo('config')"><span class="ic">⚙️</span>Configurações</div>
+    <div class="nav-item active" onclick="goTo('dash')"><span class="ic">📊</span>Dashboard</div>
+    <div class="nav-item" onclick="goTo('clientes')"><span class="ic">👤</span>Clientes</div>
+    <div class="nav-item" onclick="goTo('animais')"><span class="ic">🐴</span>Animais</div>
+    <div class="nav-item" onclick="goTo('nova')"><span class="ic">➕</span>Nova Fatura</div>
+    <div class="nav-item" onclick="goTo('lote')"><span class="ic">📦</span>Gerar em Lote</div>
+    <div class="nav-item" onclick="goTo('faturas')"><span class="ic">📄</span>Faturas</div>
+    <div class="nav-item" onclick="goTo('pagamentos')"><span class="ic">💰</span>Pagamentos</div>
+    <div class="nav-item" onclick="goTo('config')"><span class="ic">⚙️</span>Configurações</div>
   </nav>
-  <div class="sf">© 2025 Haras ET<button onclick="Auth.logout()">Sair</button></div>
+  <div class="sb-footer">© 2025 Haras ET<button onclick="Auth.logout()">Sair</button></div>
 </aside>
 
-<main class="main">
+<main class="main-content">
 
   <!-- DASHBOARD -->
   <div class="page active" id="page-dash">
-    <div class="ph">
+    <div class="page-header">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
         <div><h2>Dashboard</h2><p>Visão por competência</p></div>
         <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
@@ -142,87 +91,72 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--txt)}
             <option value="11">Novembro</option><option value="12">Dezembro</option>
           </select>
           <select id="dash-ano" class="sbar" style="width:90px" onchange="renderDash()"></select>
-          <button class="btn btn-ghost btn-sm" onclick="dashAnual()">Ver Ano</button>
+          <button class="btn btn-outline btn-sm" onclick="dashAnual()">Ver Ano</button>
         </div>
       </div>
     </div>
-    <div id="dash-comp-label" style="font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.25em;color:var(--gold-d);margin-bottom:1.5rem"></div>
-    <div class="dg" id="dash-cards"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-bottom:1.5rem" id="dash-charts-wrap">
-      <div style="background:var(--card);border:1px solid var(--b2);padding:1.5rem">
-        <div style="font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1rem">RECEITA POR CATEGORIA</div>
-        <canvas id="chart-cat" height="200"></canvas>
-      </div>
-      <div style="background:var(--card);border:1px solid var(--b2);padding:1.5rem">
-        <div style="font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1rem">RECEBIDO VS PENDENTE</div>
-        <canvas id="chart-status" height="200"></canvas>
-      </div>
+    <div id="dash-label" style="font-size:.72rem;color:var(--txt3);letter-spacing:.15em;margin-bottom:1.5rem"></div>
+    <div class="dash-grid" id="dash-cards"></div>
+    <div id="dash-charts-wrap">
+      <div class="chart-card"><h4>Receita por Categoria</h4><canvas id="chart-cat" height="200"></canvas></div>
+      <div class="chart-card"><h4>Recebido vs Pendente</h4><canvas id="chart-status" height="200"></canvas></div>
     </div>
-    <div class="tw">
-      <div class="tw-head"><h3 id="dash-fat-title">Faturas do Mês</h3><button class="btn btn-outline btn-sm" onclick="goTo('faturas')">Ver todas</button></div>
+    <div class="table-wrap">
+      <div class="table-head"><h3 id="dash-fat-title">Faturas do Mês</h3><button class="btn btn-outline btn-sm" onclick="goTo('faturas')">Ver todas</button></div>
       <div id="dash-rec"></div>
     </div>
   </div>
 
   <!-- CLIENTES -->
   <div class="page" id="page-clientes">
-    <div class="ph"><h2>Clientes</h2><p>Cadastro de clientes</p></div>
+    <div class="page-header"><h2>Clientes</h2><p>Cadastro de compradores</p></div>
     <div style="display:flex;gap:.8rem;margin-bottom:1rem;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="openModal('m-cli');limparCliForm()">+ Novo Cliente</button>
-      <input class="sbar" placeholder="Buscar..." oninput="filterCli(this.value)"/>
+      <button class="btn btn-primary" onclick="openModal('m-cli');limparCli()">+ Novo Cliente</button>
+      <input class="sbar" placeholder="Buscar cliente..." oninput="filterCli(this.value)"/>
     </div>
-    <div class="tw">
-      <table><thead><tr><th>Nome</th><th>Telefone</th><th>Cidade</th><th>Dia Venc.</th><th>Animais</th><th>Total/mês</th><th>Ações</th></tr></thead>
+    <div class="table-wrap">
+      <table><thead><tr><th>Nome</th><th>Telefone</th><th>Cidade</th><th>Venc.</th><th>Animais</th><th>Total/mês</th><th>Ações</th></tr></thead>
       <tbody id="cli-tb"></tbody></table>
-      <div id="cli-empty" class="empty" style="display:none"><div class="ei">👤</div><p>Nenhum cliente</p></div>
+      <div id="cli-empty" class="empty-state" style="display:none"><div class="empty-icon">👤</div><p>Nenhum cliente cadastrado</p></div>
     </div>
   </div>
 
   <!-- ANIMAIS -->
   <div class="page" id="page-animais">
-    <div class="ph"><h2>Animais</h2><p>Cavalos hospedados no Haras ET</p></div>
+    <div class="page-header"><h2>Animais</h2><p>Cavalos hospedados no Haras ET</p></div>
     <div style="display:flex;gap:.8rem;margin-bottom:1rem;flex-wrap:wrap">
-      <button class="btn btn-primary" onclick="openModal('m-anim');limparAnimForm()">+ Novo Animal</button>
-      <input class="sbar" placeholder="Buscar..." oninput="filterAnim(this.value)"/>
+      <button class="btn btn-primary" onclick="openModal('m-anim');limparAnim()">+ Novo Animal</button>
+      <input class="sbar" placeholder="Buscar animal..." oninput="filterAnim(this.value)"/>
     </div>
-    <div class="tw">
+    <div class="table-wrap">
       <table><thead><tr><th>Nome</th><th>Dono</th><th>Categoria</th><th>Valor/mês</th><th>Ações</th></tr></thead>
       <tbody id="anim-tb"></tbody></table>
-      <div id="anim-empty" class="empty" style="display:none"><div class="ei">🐴</div><p>Nenhum animal</p></div>
+      <div id="anim-empty" class="empty-state" style="display:none"><div class="empty-icon">🐴</div><p>Nenhum animal cadastrado</p></div>
     </div>
   </div>
 
   <!-- NOVA FATURA -->
   <div class="page" id="page-nova">
-    <div class="ph"><h2>Nova Fatura</h2><p>Emitir fatura individual</p></div>
-    <div class="fsec">
-      <div class="fsec-title">Dados</div>
+    <div class="page-header"><h2>Nova Fatura</h2><p>Emitir fatura individual</p></div>
+    <div class="card-section">
+      <div class="card-section-title">Dados</div>
       <div class="fgrid">
         <div class="fg"><label>Cliente *</label><select id="f-cli" onchange="preencherItens()"><option value="">Selecionar...</option></select></div>
         <div class="fg"><label>Emissão</label><input type="date" id="f-emissao"/></div>
         <div class="fg"><label>Vencimento</label><input type="date" id="f-venc"/></div>
-        <div class="fg"><label>Forma</label><select id="f-forma"><option>PIX</option><option>Transferência</option><option>Dinheiro</option><option>Cheque</option><option>A prazo</option></select></div>
+        <div class="fg"><label>Forma de Pagamento</label><select id="f-forma"><option>PIX</option><option>Transferência</option><option>Dinheiro</option><option>Cheque</option><option>A prazo</option></select></div>
       </div>
     </div>
-    <div class="fsec">
-      <div class="fsec-title"><span>Itens</span><button class="btn btn-ghost btn-sm" onclick="addItem()">+ Item</button></div>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:1rem">
-        <thead><tr>
-          <th style="font-family:Cinzel,serif;font-size:.56rem;letter-spacing:.15em;color:var(--txt3);padding:.6rem .8rem;border-bottom:1px solid var(--b2);text-align:left;width:42%">Descrição</th>
-          <th style="font-family:Cinzel,serif;font-size:.56rem;letter-spacing:.15em;color:var(--txt3);padding:.6rem .8rem;border-bottom:1px solid var(--b2);text-align:left;width:12%">Qtd</th>
-          <th style="font-family:Cinzel,serif;font-size:.56rem;letter-spacing:.15em;color:var(--txt3);padding:.6rem .8rem;border-bottom:1px solid var(--b2);text-align:left;width:20%">Valor Unit.</th>
-          <th style="font-family:Cinzel,serif;font-size:.56rem;letter-spacing:.15em;color:var(--txt3);padding:.6rem .8rem;border-bottom:1px solid var(--b2);text-align:left;width:18%">Total</th>
-          <th style="width:8%"></th>
-        </tr></thead>
-        <tbody id="f-items"></tbody>
-      </table>
-      <div style="display:flex;justify-content:flex-end;gap:2rem;padding:1rem 0;border-top:1px solid var(--b2)">
-        <span style="font-family:Cinzel,serif;font-size:.75rem;color:var(--txt2)">Total:</span>
-        <strong id="f-total" style="font-family:Cinzel,serif;font-size:1.1rem;color:var(--gold)">R$ 0,00</strong>
+    <div class="card-section">
+      <div class="card-section-title"><span>Itens / Serviços</span><button class="btn btn-ghost btn-sm" onclick="addItem()">+ Item</button></div>
+      <div class="items-wrap">
+        <table><thead><tr><th style="width:42%">Descrição</th><th style="width:12%">Qtd</th><th style="width:20%">Valor Unit.</th><th style="width:18%">Total</th><th style="width:8%"></th></tr></thead>
+        <tbody id="f-items"></tbody></table>
       </div>
+      <div class="total-bar"><span>Total:</span><strong id="f-total">R$ 0,00</strong></div>
     </div>
-    <div class="fsec">
-      <div class="fsec-title">Observações</div>
+    <div class="card-section">
+      <div class="card-section-title">Observações</div>
       <div class="fg"><textarea id="f-obs" rows="3" placeholder="Condições, referência..."></textarea></div>
     </div>
     <div style="display:flex;gap:.8rem;flex-wrap:wrap">
@@ -233,17 +167,17 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--txt)}
 
   <!-- LOTE -->
   <div class="page" id="page-lote">
-    <div class="ph"><h2>Gerar em Lote</h2><p>Faturas mensais</p></div>
-    <div class="fsec">
-      <div class="fsec-title">Configuração</div>
+    <div class="page-header"><h2>Gerar em Lote</h2><p>Faturas mensais para múltiplos clientes</p></div>
+    <div class="card-section">
+      <div class="card-section-title">Configuração</div>
       <div class="fgrid">
         <div class="fg"><label>Mês de Referência</label><input type="month" id="lote-mes"/></div>
         <div class="fg"><label>Dia do Vencimento</label><input type="number" id="lote-dia" value="5" min="1" max="31"/></div>
         <div class="fg"><label>Forma de Pagamento</label><select id="lote-forma"><option>PIX</option><option>Transferência</option><option>Dinheiro</option><option>Cheque</option><option>A prazo</option></select></div>
       </div>
     </div>
-    <div class="fsec">
-      <div class="fsec-title">
+    <div class="card-section">
+      <div class="card-section-title">
         <span>Clientes com Animais</span>
         <div style="display:flex;gap:.5rem">
           <button class="btn btn-ghost btn-sm" onclick="selTodos(true)">Todos</button>
@@ -251,20 +185,20 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--txt)}
         </div>
       </div>
       <div id="lote-lista"></div>
-      <div class="lote-summary" id="lote-summary" style="margin-top:1rem;display:none">
+      <div class="lote-summary" id="lote-summary" style="margin-top:.8rem;display:none">
         <span>Selecionados: <strong id="ls-qtd">0</strong></span>
         <span>Total a faturar: <strong id="ls-total">R$ 0,00</strong></span>
       </div>
     </div>
     <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="gerarLote()" id="btn-lote">⚡ Gerar Faturas</button>
-      <span id="lote-status" style="font-size:.8rem;color:var(--txt2)"></span>
+      <span id="lote-status" style="font-size:.82rem;color:var(--txt2)"></span>
     </div>
   </div>
 
   <!-- FATURAS -->
   <div class="page" id="page-faturas">
-    <div class="ph"><h2>Faturas</h2><p>Histórico de faturas</p></div>
+    <div class="page-header"><h2>Faturas</h2><p>Histórico de faturas emitidas</p></div>
     <div style="display:flex;gap:.8rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
       <button class="btn btn-primary" onclick="goTo('nova')">+ Nova Fatura</button>
       <button class="btn btn-outline" onclick="goTo('lote')">📦 Lote</button>
@@ -272,158 +206,153 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--txt)}
       <select class="sbar" id="fat-status" style="width:140px" onchange="filterFat()">
         <option value="">Todos status</option><option value="pendente">Pendentes</option><option value="pago">Pagas</option>
       </select>
-      <select class="sbar" id="fat-cli-filter" style="width:180px" onchange="filterFat()"><option value="">Todos clientes</option></select>
+      <select class="sbar" id="fat-cli-f" style="width:180px" onchange="filterFat()"><option value="">Todos clientes</option></select>
     </div>
-    <div id="fat-resumo" style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap"></div>
-    <div class="tw">
+    <div id="fat-resumo" style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;font-size:.8rem;color:var(--txt2)"></div>
+    <div class="table-wrap">
       <table><thead><tr><th>#</th><th>Cliente</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr></thead>
       <tbody id="fat-tb"></tbody></table>
-      <div id="fat-empty" class="empty" style="display:none"><div class="ei">📄</div><p>Nenhuma fatura</p></div>
+      <div id="fat-empty" class="empty-state" style="display:none"><div class="empty-icon">📄</div><p>Nenhuma fatura</p></div>
     </div>
   </div>
 
   <!-- PAGAMENTOS -->
   <div class="page" id="page-pagamentos">
-    <div class="ph"><h2>Pagamentos</h2><p>Controle de recebimentos</p></div>
-    <div class="dg" id="pag-cards" style="margin-bottom:1.5rem"></div>
-    <div class="tw">
-      <table><thead><tr><th>#</th><th>Cliente</th><th>Valor</th><th>Forma</th><th>Pgto</th><th>Status</th><th>Ações</th></tr></thead>
+    <div class="page-header"><h2>Pagamentos</h2><p>Controle de recebimentos</p></div>
+    <div class="dash-grid" id="pag-cards" style="margin-bottom:1.5rem"></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>#</th><th>Cliente</th><th>Valor</th><th>Forma</th><th>Data Pgto</th><th>Status</th><th>Ações</th></tr></thead>
       <tbody id="pag-tb"></tbody></table>
-      <div id="pag-empty" class="empty" style="display:none"><div class="ei">💰</div><p>Nenhum pagamento</p></div>
+      <div id="pag-empty" class="empty-state" style="display:none"><div class="empty-icon">💰</div><p>Nenhum pagamento</p></div>
     </div>
   </div>
 
   <!-- CONFIG -->
   <div class="page" id="page-config">
-    <div class="ph"><h2>Configurações</h2><p>Sistema Haras ET</p></div>
-    <div class="fsec">
-      <div class="fsec-title">Categorias de Hospedagem</div>
+    <div class="page-header"><h2>Configurações</h2><p>Sistema Haras ET</p></div>
+    <div class="card-section">
+      <div class="card-section-title">Categorias de Hospedagem</div>
       <div id="cats-lista" style="margin-bottom:1rem"></div>
-      <button class="btn btn-outline btn-sm" onclick="openModal('m-cat');document.getElementById('cat-nome').value='';document.getElementById('cat-preco').value=''">+ Nova Categoria</button>
+      <button class="btn btn-outline btn-sm" onclick="openModal('m-cat');document.getElementById('cat-id').value='';document.getElementById('cat-nome').value='';document.getElementById('cat-preco').value=''">+ Nova Categoria</button>
     </div>
-    <div class="fsec">
-      <div class="fsec-title">API</div>
-      <p style="font-size:.82rem;color:var(--green);margin-bottom:.5rem">✅ Conectado ao backend MongoDB</p>
-      <p style="font-size:.75rem;color:var(--txt3)">https://haraset-api.onrender.com</p>
+    <div class="card-section">
+      <div class="card-section-title">Status da API</div>
+      <div style="display:flex;align-items:center;gap:.8rem">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green)"></span>
+        <span style="font-size:.85rem;color:var(--txt2)">Conectado ao backend MongoDB</span>
+      </div>
+      <p style="font-size:.75rem;color:var(--txt3);margin-top:.4rem">https://haraset-api.onrender.com</p>
     </div>
   </div>
 
 </main>
 
-<!-- MODAL CLIENTE -->
-<div class="mo" id="m-cli">
+<!-- MODAIS -->
+<div class="modal-overlay" id="m-cli">
   <div class="modal">
-    <div class="mh"><h3>Cliente</h3><button class="mclose" onclick="closeModal('m-cli')">✕</button></div>
-    <div class="mc">
+    <div class="modal-header"><h3>Cliente</h3><button class="modal-close" onclick="closeModal('m-cli')">✕</button></div>
+    <div class="modal-body">
       <input type="hidden" id="c-id"/>
       <div class="fgrid">
-        <div class="fg"><label>Nome *</label><input id="c-nome"/></div>
+        <div class="fg"><label>Nome *</label><input id="c-nome" placeholder="Nome completo"/></div>
         <div class="fg"><label>Telefone</label><input id="c-tel" placeholder="81999999999"/></div>
-        <div class="fg"><label>CPF/CNPJ</label><input id="c-doc"/></div>
+        <div class="fg"><label>CPF / CNPJ</label><input id="c-doc"/></div>
         <div class="fg"><label>Cidade</label><input id="c-cidade"/></div>
         <div class="fg"><label>UF</label><input id="c-uf" maxlength="2" value="PE"/></div>
         <div class="fg"><label>Dia Vencimento</label><input type="number" id="c-diavenc" value="5" min="1" max="31"/></div>
       </div>
-      <div class="fg"><label>Obs</label><textarea id="c-obs" rows="2"></textarea></div>
+      <div class="fg"><label>Observações</label><textarea id="c-obs" rows="2"></textarea></div>
     </div>
-    <div class="mf">
+    <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('m-cli')">Cancelar</button>
       <button class="btn btn-primary btn-sm" onclick="salvarCliente()">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL ANIMAL -->
-<div class="mo" id="m-anim">
+<div class="modal-overlay" id="m-anim">
   <div class="modal" style="max-width:440px">
-    <div class="mh"><h3>Animal</h3><button class="mclose" onclick="closeModal('m-anim')">✕</button></div>
-    <div class="mc">
+    <div class="modal-header"><h3>Animal</h3><button class="modal-close" onclick="closeModal('m-anim')">✕</button></div>
+    <div class="modal-body">
       <input type="hidden" id="a-id"/>
       <div class="fgrid">
         <div class="fg"><label>Nome *</label><input id="a-nome"/></div>
         <div class="fg"><label>Categoria</label><select id="a-cat"><option value="">Sem categoria</option></select></div>
         <div class="fg" style="grid-column:span 2"><label>Dono (Cliente)</label><select id="a-cli"><option value="">Sem dono</option></select></div>
       </div>
-      <div class="fg"><label>Obs</label><textarea id="a-obs" rows="2"></textarea></div>
+      <div class="fg"><label>Observações</label><textarea id="a-obs" rows="2"></textarea></div>
     </div>
-    <div class="mf">
+    <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('m-anim')">Cancelar</button>
       <button class="btn btn-primary btn-sm" onclick="salvarAnimal()">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL PAGAMENTO -->
-<div class="mo" id="m-pag">
+<div class="modal-overlay" id="m-pag">
   <div class="modal" style="max-width:420px">
-    <div class="mh"><h3>Registrar Pagamento</h3><button class="mclose" onclick="closeModal('m-pag')">✕</button></div>
-    <div class="mc">
+    <div class="modal-header"><h3>Registrar Pagamento</h3><button class="modal-close" onclick="closeModal('m-pag')">✕</button></div>
+    <div class="modal-body">
       <input type="hidden" id="p-fid"/>
       <div class="fgrid">
         <div class="fg"><label>Data</label><input type="date" id="p-data"/></div>
         <div class="fg"><label>Forma</label><select id="p-forma"><option>PIX</option><option>Transferência</option><option>Dinheiro</option><option>Cheque</option></select></div>
       </div>
-      <div class="fg"><label>Obs</label><textarea id="p-obs" rows="2"></textarea></div>
+      <div class="fg"><label>Observações</label><textarea id="p-obs" rows="2"></textarea></div>
     </div>
-    <div class="mf">
+    <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('m-pag')">Cancelar</button>
-      <button class="btn btn-primary btn-sm" onclick="confirmarPag()">Confirmar</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmarPag()">Confirmar Pagamento</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL CATEGORIA -->
-<div class="mo" id="m-cat">
-  <div class="modal" style="max-width:380px">
-    <div class="mh"><h3>Categoria</h3><button class="mclose" onclick="closeModal('m-cat')">✕</button></div>
-    <div class="mc">
+<div class="modal-overlay" id="m-cat">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header"><h3>Categoria</h3><button class="modal-close" onclick="closeModal('m-cat')">✕</button></div>
+    <div class="modal-body">
       <input type="hidden" id="cat-id"/>
-      <div class="fg" style="margin-bottom:1rem"><label>Nome *</label><input id="cat-nome" placeholder="Ex: Baia Nova"/></div>
+      <div class="fg" style="margin-bottom:.8rem"><label>Nome *</label><input id="cat-nome" placeholder="Ex: Baia Nova"/></div>
       <div class="fg"><label>Preço (R$)</label><input type="number" id="cat-preco" step="0.01" placeholder="550"/></div>
     </div>
-    <div class="mf">
+    <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('m-cat')">Cancelar</button>
-      <button class="btn btn-primary btn-sm" onclick="salvarCategoria()">Salvar</button>
+      <button class="btn btn-primary btn-sm" onclick="salvarCat()">Salvar</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="lov" id="lov"><div class="lsp"></div><p id="lov-msg">Aguarde...</p></div>
+<div class="loading-overlay" id="loading"><div class="spinner-lg"></div><p id="loading-msg">Aguarde...</p></div>
 
 <script>
-// ── VERIFICAR AUTH ────────────────────────────────────────────
-if(!getToken() || getPerfil() !== 'admin'){
-  window.location.href = 'acesso.html#admin';
-}
+if(!getToken()||getPerfil()!=='admin') window.location.href='acesso.html#admin';
 
-// ── CACHE ─────────────────────────────────────────────────────
-let DB = { clientes:[], animais:[], faturas:[], categorias:[] };
+let DB={clientes:[],animais:[],faturas:[],categorias:[]};
 
-// ── HELPERS ───────────────────────────────────────────────────
-const fmtM = v => 'R$ '+parseFloat(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
-const fmtD = d => { if(!d||d==='')return '—'; const p=String(d).split('-'); return p.length<3?String(d):p[2]+'/'+p[1]+'/'+p[0]; };
-const today = () => new Date().toISOString().split('T')[0];
+const fmtM=v=>'R$ '+parseFloat(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+const fmtD=d=>{if(!d||d==='')return'—';const p=String(d).split('-');return p.length<3?String(d):p[2]+'/'+p[1]+'/'+p[0];};
+const today=()=>new Date().toISOString().split('T')[0];
+const getId=o=>o?._id||o?.id||'';
 
-function loading(m='Aguarde...'){ document.getElementById('lov-msg').textContent=m; document.getElementById('lov').classList.add('show'); }
-function hideLoad(){ document.getElementById('lov').classList.remove('show'); }
-function toast(m,t=''){ const el=document.getElementById('toast'); el.textContent=m; el.className='toast'+(t?' '+t:''); el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o)o.classList.remove('open'); }));
-function toggleSB(){ document.getElementById('sidebar').classList.toggle('open'); }
-function getCatPreco(nome){ const c=DB.categorias.find(x=>x.nome===nome); return c?parseFloat(c.preco||0):0; }
-function getAnimaisCli(cid){ return DB.animais.filter(a=>String(a.clienteId)===String(cid)); }
-function totalCli(cid){ return getAnimaisCli(cid).reduce((s,a)=>s+getCatPreco(a.categoria),0); }
+function loading(m='Aguarde...'){document.getElementById('loading-msg').textContent=m;document.getElementById('loading').classList.add('show')}
+function hideLoad(){document.getElementById('loading').classList.remove('show')}
+function toast(m,t=''){const el=document.getElementById('toast');el.textContent=m;el.className='toast'+(t?' '+t:'');el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000)}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+function toggleSB(){document.getElementById('sidebar').classList.toggle('open')}
+function getCatPreco(n){const c=DB.categorias.find(x=>x.nome===n);return c?parseFloat(c.preco||0):0}
+function getAnimCli(cid){return DB.animais.filter(a=>String(a.clienteId)===String(cid))}
+function totalCli(cid){return getAnimCli(cid).reduce((s,a)=>s+getCatPreco(a.categoria),0)}
 
-// ── NAV ───────────────────────────────────────────────────────
 async function goTo(page){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   const lbl={dash:'dashboard',clientes:'cliente',animais:'animal',nova:'nova',lote:'lote',faturas:'fatura',pagamentos:'pagamento',config:'config'};
-  document.querySelectorAll('.ni').forEach(n=>{ if(n.textContent.trim().toLowerCase().includes((lbl[page]||page).slice(0,5))) n.classList.add('active'); });
-  if(window.innerWidth<=768) document.getElementById('sidebar').classList.remove('open');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.trim().toLowerCase().includes((lbl[page]||page).slice(0,5)))n.classList.add('active')});
+  if(window.innerWidth<=768)document.getElementById('sidebar').classList.remove('open');
   window.scrollTo(0,0);
   if(page==='dash')       await renderDash();
   if(page==='clientes')   await renderClientes();
@@ -435,39 +364,34 @@ async function goTo(page){
   if(page==='config')     await renderConfig();
 }
 
-// ── DASHBOARD ─────────────────────────────────────────────────
-let chartCat=null, chartStatus=null, dashInited=false;
-
+// ── DASHBOARD ────────────────────────────────────────────────
+let chartCat=null,chartStatus=null,dashInited=false;
 function initDashSelects(){
-  if(dashInited) return; dashInited=true;
+  if(dashInited)return;dashInited=true;
   const now=new Date();
   const anoSel=document.getElementById('dash-ano');
   for(let a=now.getFullYear()-2;a<=now.getFullYear()+1;a++){
-    const o=document.createElement('option'); o.value=a; o.textContent=a;
-    if(a===now.getFullYear()) o.selected=true; anoSel.appendChild(o);
+    const o=document.createElement('option');o.value=a;o.textContent=a;
+    if(a===now.getFullYear())o.selected=true;anoSel.appendChild(o);
   }
   document.getElementById('dash-mes').value=now.getMonth()+1;
 }
 
 async function renderDash(){
-  initDashSelects();
-  loading('Carregando dashboard...');
+  initDashSelects();loading('Carregando dashboard...');
   try{
-    const [faturas,clientes,animais,categorias] = await Promise.all([
-      Faturas.listar(), Clientes.listar(), Animais.listar(), Categorias.listar()
-    ]);
-    DB.faturas=faturas; DB.clientes=clientes; DB.animais=animais; DB.categorias=categorias;
-    hideLoad();
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
+    const [fa,cl,an,ca]=await Promise.all([Faturas.listar(),Clientes.listar(),Animais.listar(),Categorias.listar()]);
+    DB.faturas=fa;DB.clientes=cl;DB.animais=an;DB.categorias=ca;hideLoad();
+  }catch(e){hideLoad();toast('Erro: '+e.message,'error');return}
 
   const mes=parseInt(document.getElementById('dash-mes')?.value||new Date().getMonth()+1);
   const ano=parseInt(document.getElementById('dash-ano')?.value||new Date().getFullYear());
-  const mNomes=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const mShort=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mN=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const mS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-  const fa=DB.faturas.filter(f=>{ if(!f.vencimento)return false; const[y,m]=f.vencimento.split('-'); return parseInt(y)===ano&&parseInt(m)===mes; });
-  document.getElementById('dash-comp-label').textContent=`Competência: ${mNomes[mes-1]} / ${ano}`;
-  document.getElementById('dash-fat-title').textContent=`Faturas — ${mNomes[mes-1]}/${ano}`;
+  const fa=DB.faturas.filter(f=>{if(!f.vencimento)return false;const[y,m]=f.vencimento.split('-');return parseInt(y)===ano&&parseInt(m)===mes;});
+  document.getElementById('dash-label').textContent=`Competência: ${mN[mes-1]} / ${ano}`;
+  document.getElementById('dash-fat-title').textContent=`Faturas — ${mN[mes-1]}/${ano}`;
 
   const total=fa.reduce((s,f)=>s+parseFloat(f.total||0),0);
   const pago=fa.filter(f=>f.status==='pago').reduce((s,f)=>s+parseFloat(f.total||0),0);
@@ -475,473 +399,335 @@ async function renderDash(){
   const taxa=total>0?Math.round(pago/total*100):0;
 
   document.getElementById('dash-cards').innerHTML=`
-    <div class="dc"><div class="lbl">Faturado</div><div class="val">${fmtM(total)}</div><div class="sub">${fa.length} faturas</div></div>
-    <div class="dc"><div class="lbl">Recebido</div><div class="val" style="color:var(--green)">${fmtM(pago)}</div><div class="sub">${fa.filter(f=>f.status==='pago').length} pagas</div></div>
-    <div class="dc"><div class="lbl">Pendente</div><div class="val" style="color:var(--orange)">${fmtM(pend)}</div></div>
-    <div class="dc"><div class="lbl">Taxa Recebimento</div><div class="val" style="color:${taxa>=80?'var(--green)':taxa>=50?'var(--orange)':'var(--red-b)'}">${taxa}%</div><div class="sub">${DB.clientes.length} clientes · ${DB.animais.length} animais</div></div>`;
+    <div class="dash-card"><div class="dc-label">Faturado</div><div class="dc-value">${fmtM(total)}</div><div class="dc-sub">${fa.length} faturas</div></div>
+    <div class="dash-card"><div class="dc-label">Recebido</div><div class="dc-value" style="color:var(--green)">${fmtM(pago)}</div><div class="dc-sub">${fa.filter(f=>f.status==='pago').length} pagas</div></div>
+    <div class="dash-card"><div class="dc-label">Pendente</div><div class="dc-value" style="color:var(--orange)">${fmtM(pend)}</div><div class="dc-sub">${fa.filter(f=>f.status==='pendente').length} pendentes</div></div>
+    <div class="dash-card"><div class="dc-label">Taxa Recebimento</div><div class="dc-value" style="color:${taxa>=80?'var(--green)':taxa>=50?'var(--orange)':'var(--red-b)'}">${taxa}%</div><div class="dc-sub">${DB.clientes.length} clientes · ${DB.animais.length} animais</div></div>`;
 
-  // Gráfico categorias
   const catData={};
-  fa.forEach(f=>{ getAnimaisCli(f.clienteId).filter(a=>a.categoria).forEach(a=>{ catData[a.categoria]=(catData[a.categoria]||0)+getCatPreco(a.categoria); }); });
-  if(chartCat) chartCat.destroy();
+  fa.forEach(f=>getAnimCli(getId(f)||f.clienteId).filter(a=>a.categoria).forEach(a=>{catData[a.categoria]=(catData[a.categoria]||0)+getCatPreco(a.categoria);}));
+  if(chartCat)chartCat.destroy();
   const ctx1=document.getElementById('chart-cat')?.getContext('2d');
   if(ctx1){
-    const labs=Object.keys(catData); const vals=labs.map(k=>catData[k]);
-    chartCat=new Chart(ctx1,{ type:'doughnut', data:{ labels:labs, datasets:[{ data:vals, backgroundColor:['rgba(201,168,76,0.8)','rgba(52,152,219,0.8)','rgba(46,204,113,0.8)','rgba(230,126,34,0.8)'], borderColor:'#161616', borderWidth:3 }] }, options:{ responsive:true, plugins:{ legend:{ position:'bottom', labels:{ color:'#a89880', font:{family:'Lato',size:11}, padding:12 } }, tooltip:{ callbacks:{ label:ctx=>ctx.label+': '+fmtM(ctx.raw) } } } } });
+    const labs=Object.keys(catData),vals=labs.map(k=>catData[k]);
+    chartCat=new Chart(ctx1,{type:'doughnut',data:{labels:labs,datasets:[{data:vals,backgroundColor:['#B8860B','#DAA520','#8B6200','#E8C97E'],borderColor:'#fff',borderWidth:3}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#7A6A5A',font:{family:'Inter',size:12},padding:12}},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmtM(ctx.raw)}}}}});
   }
 
-  // Gráfico 6 meses
   const m6=[];
-  for(let i=5;i>=0;i--){ const d=new Date(ano,mes-1-i,1); m6.push({label:mShort[d.getMonth()]+'/'+String(d.getFullYear()).slice(2),year:d.getFullYear(),month:d.getMonth()+1}); }
-  const pagoArr=m6.map(m=>DB.faturas.filter(f=>{ if(!f.vencimento)return false; const[y,mo]=f.vencimento.split('-'); return parseInt(y)===m.year&&parseInt(mo)===m.month&&f.status==='pago'; }).reduce((s,f)=>s+parseFloat(f.total||0),0));
-  const pendArr=m6.map(m=>DB.faturas.filter(f=>{ if(!f.vencimento)return false; const[y,mo]=f.vencimento.split('-'); return parseInt(y)===m.year&&parseInt(mo)===m.month&&f.status==='pendente'; }).reduce((s,f)=>s+parseFloat(f.total||0),0));
-  if(chartStatus) chartStatus.destroy();
+  for(let i=5;i>=0;i--){const d=new Date(ano,mes-1-i,1);m6.push({label:mS[d.getMonth()]+'/'+String(d.getFullYear()).slice(2),year:d.getFullYear(),month:d.getMonth()+1});}
+  const pagoArr=m6.map(m=>DB.faturas.filter(f=>{if(!f.vencimento)return false;const[y,mo]=f.vencimento.split('-');return parseInt(y)===m.year&&parseInt(mo)===m.month&&f.status==='pago';}).reduce((s,f)=>s+parseFloat(f.total||0),0));
+  const pendArr=m6.map(m=>DB.faturas.filter(f=>{if(!f.vencimento)return false;const[y,mo]=f.vencimento.split('-');return parseInt(y)===m.year&&parseInt(mo)===m.month&&f.status==='pendente';}).reduce((s,f)=>s+parseFloat(f.total||0),0));
+  if(chartStatus)chartStatus.destroy();
   const ctx2=document.getElementById('chart-status')?.getContext('2d');
-  if(ctx2){ chartStatus=new Chart(ctx2,{ type:'bar', data:{ labels:m6.map(m=>m.label), datasets:[{ label:'Recebido', data:pagoArr, backgroundColor:'rgba(46,204,113,0.7)', borderRadius:3 },{ label:'Pendente', data:pendArr, backgroundColor:'rgba(230,126,34,0.5)', borderRadius:3 }] }, options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#a89880', font:{family:'Lato',size:11} } }, tooltip:{ callbacks:{ label:ctx=>ctx.dataset.label+': '+fmtM(ctx.raw) } } }, scales:{ x:{ ticks:{ color:'#6b5f4e' }, grid:{ color:'rgba(255,255,255,0.04)' } }, y:{ ticks:{ color:'#6b5f4e', callback:v=>'R$'+v.toLocaleString('pt-BR') }, grid:{ color:'rgba(255,255,255,0.04)' }, border:{ color:'transparent' } } } } }); }
+  if(ctx2)chartStatus=new Chart(ctx2,{type:'bar',data:{labels:m6.map(m=>m.label),datasets:[{label:'Recebido',data:pagoArr,backgroundColor:'rgba(46,125,50,0.7)',borderRadius:4},{label:'Pendente',data:pendArr,backgroundColor:'rgba(139,98,0,0.5)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{labels:{color:'#7A6A5A',font:{family:'Inter',size:12}}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtM(ctx.raw)}}},scales:{x:{ticks:{color:'#9A8B7A'},grid:{color:'rgba(232,223,208,0.5)'}},y:{ticks:{color:'#9A8B7A',callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'rgba(232,223,208,0.5)'},border:{color:'transparent'}}}}});
 
-  // Faturas do mês
   const sorted=fa.slice().sort((a,b)=>parseInt(b.num)-parseInt(a.num));
   document.getElementById('dash-rec').innerHTML=sorted.length?sorted.map(f=>{
-    const c=DB.clientes.find(x=>x._id===f.clienteId||x.id===f.clienteId);
-    return `<div style="background:var(--card);border:1px solid var(--b2);padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;gap:1rem">
-      <div style="flex:1"><div style="font-size:.85rem;color:var(--txt)">${c?c.nome:'—'}</div><div style="font-size:.72rem;color:var(--txt2)">#${String(f.num).padStart(4,'0')} · <span class="badge badge-${f.status}">${f.status}</span></div></div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="font-family:Cinzel,serif;color:var(--gold)">${fmtM(f.total)}</div>
-        <div style="font-size:.7rem;color:var(--txt3)">${fmtD(f.vencimento)}</div>
-        ${f.status==='pendente'?`<button class="btn btn-green btn-sm" style="margin-top:.3rem" onclick="abrirPag('${f._id||f.id}')">✓ Receber</button>`:''}
-      </div>
-    </div>`;
-  }).join(''):'<div class="empty"><div class="ei">📄</div><p>Nenhuma fatura para este mês</p></div>';
+    const c=DB.clientes.find(x=>getId(x)===f.clienteId);
+    return `<div class="recent-item">
+      <div class="ri-left"><h4>${c?c.nome:'—'}</h4><p>#${String(f.num).padStart(4,'0')} · <span class="badge badge-${f.status}">${f.status}</span></p></div>
+      <div class="ri-right"><div class="ri-val">${fmtM(f.total)}</div><div class="ri-date">${fmtD(f.vencimento)}</div>
+      ${f.status==='pendente'?`<button class="btn btn-success btn-sm" style="margin-top:.3rem" onclick="abrirPag('${getId(f)||f.id}')">✓ Receber</button>`:''}
+      </div></div>`;
+  }).join(''):'<div class="empty-state"><div class="empty-icon">📄</div><p>Nenhuma fatura para este mês</p></div>';
 }
 
 async function dashAnual(){
   const ano=parseInt(document.getElementById('dash-ano')?.value||new Date().getFullYear());
   loading('Carregando ano...');
-  try{ if(!DB.faturas.length) DB.faturas=await Faturas.listar(); hideLoad(); }
-  catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
+  try{if(!DB.faturas.length)DB.faturas=await Faturas.listar();hideLoad();}
+  catch(e){hideLoad();toast('Erro','error');return}
   const mN=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   const m12=Array.from({length:12},(_,i)=>i+1);
-  const pagoArr=m12.map(m=>DB.faturas.filter(f=>{ if(!f.vencimento)return false; const[y,mo]=f.vencimento.split('-'); return parseInt(y)===ano&&parseInt(mo)===m&&f.status==='pago'; }).reduce((s,f)=>s+parseFloat(f.total||0),0));
-  const pendArr=m12.map(m=>DB.faturas.filter(f=>{ if(!f.vencimento)return false; const[y,mo]=f.vencimento.split('-'); return parseInt(y)===ano&&parseInt(mo)===m&&f.status==='pendente'; }).reduce((s,f)=>s+parseFloat(f.total||0),0));
+  const pagoArr=m12.map(m=>DB.faturas.filter(f=>{if(!f.vencimento)return false;const[y,mo]=f.vencimento.split('-');return parseInt(y)===ano&&parseInt(mo)===m&&f.status==='pago';}).reduce((s,f)=>s+parseFloat(f.total||0),0));
+  const pendArr=m12.map(m=>DB.faturas.filter(f=>{if(!f.vencimento)return false;const[y,mo]=f.vencimento.split('-');return parseInt(y)===ano&&parseInt(mo)===m&&f.status==='pendente';}).reduce((s,f)=>s+parseFloat(f.total||0),0));
   const totalAno=[...pagoArr,...pendArr].reduce((s,v)=>s+v,0);
   const pagoAno=pagoArr.reduce((s,v)=>s+v,0);
-  document.getElementById('dash-comp-label').textContent=`Ano completo: ${ano} — Total: ${fmtM(totalAno)} · Recebido: ${fmtM(pagoAno)}`;
+  document.getElementById('dash-label').textContent=`Ano completo: ${ano} — Total: ${fmtM(totalAno)} · Recebido: ${fmtM(pagoAno)}`;
   document.getElementById('dash-cards').innerHTML=`
-    <div class="dc"><div class="lbl">Total ${ano}</div><div class="val">${fmtM(totalAno)}</div></div>
-    <div class="dc"><div class="lbl">Recebido</div><div class="val" style="color:var(--green)">${fmtM(pagoAno)}</div></div>
-    <div class="dc"><div class="lbl">Pendente</div><div class="val" style="color:var(--orange)">${fmtM(pendArr.reduce((s,v)=>s+v,0))}</div></div>
-    <div class="dc"><div class="lbl">Taxa</div><div class="val" style="color:var(--gold)">${totalAno>0?Math.round(pagoAno/totalAno*100):0}%</div></div>`;
-  if(chartCat) chartCat.destroy();
-  if(chartStatus) chartStatus.destroy();
+    <div class="dash-card"><div class="dc-label">Total ${ano}</div><div class="dc-value">${fmtM(totalAno)}</div></div>
+    <div class="dash-card"><div class="dc-label">Recebido</div><div class="dc-value" style="color:var(--green)">${fmtM(pagoAno)}</div></div>
+    <div class="dash-card"><div class="dc-label">Pendente</div><div class="dc-value" style="color:var(--orange)">${fmtM(pendArr.reduce((s,v)=>s+v,0))}</div></div>
+    <div class="dash-card"><div class="dc-label">Taxa</div><div class="dc-value">${totalAno>0?Math.round(pagoAno/totalAno*100):0}%</div></div>`;
+  if(chartCat)chartCat.destroy();
+  if(chartStatus)chartStatus.destroy();
   const ctx2=document.getElementById('chart-status')?.getContext('2d');
-  if(ctx2){ chartStatus=new Chart(ctx2,{ type:'bar', data:{ labels:mN, datasets:[{ label:'Recebido', data:pagoArr, backgroundColor:'rgba(46,204,113,0.7)', borderRadius:3 },{ label:'Pendente', data:pendArr, backgroundColor:'rgba(230,126,34,0.5)', borderRadius:3 }] }, options:{ responsive:true, plugins:{ legend:{ labels:{ color:'#a89880' } }, tooltip:{ callbacks:{ label:ctx=>ctx.dataset.label+': '+fmtM(ctx.raw) } } }, scales:{ x:{ ticks:{ color:'#6b5f4e' }, grid:{ color:'rgba(255,255,255,0.04)' } }, y:{ ticks:{ color:'#6b5f4e', callback:v=>'R$'+v.toLocaleString('pt-BR') }, grid:{ color:'rgba(255,255,255,0.04)' } } } } }); }
-  document.getElementById('dash-rec').innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px">${m12.map(m=>{ const tot=(pagoArr[m-1]||0)+(pendArr[m-1]||0); return `<div style="background:var(--card);padding:1.2rem;border:1px solid var(--b2);cursor:pointer" onclick="document.getElementById('dash-mes').value=${m};renderDash()"><div style="font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.2em;color:var(--txt3);margin-bottom:.5rem">${mN[m-1]}</div><div style="font-family:Cinzel,serif;font-size:1rem;color:var(--gold)">${fmtM(tot)}</div><div style="font-size:.7rem;color:var(--green);margin-top:.2rem">✓ ${fmtM(pagoArr[m-1]||0)}</div></div>`; }).join('')}</div>`;
+  if(ctx2)chartStatus=new Chart(ctx2,{type:'bar',data:{labels:mN,datasets:[{label:'Recebido',data:pagoArr,backgroundColor:'rgba(46,125,50,0.7)',borderRadius:4},{label:'Pendente',data:pendArr,backgroundColor:'rgba(139,98,0,0.5)',borderRadius:4}]},options:{responsive:true,plugins:{legend:{labels:{color:'#7A6A5A'}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtM(ctx.raw)}}},scales:{x:{ticks:{color:'#9A8B7A'},grid:{color:'rgba(232,223,208,0.5)'}},y:{ticks:{color:'#9A8B7A',callback:v=>'R$'+v.toLocaleString('pt-BR')},grid:{color:'rgba(232,223,208,0.5)'},border:{color:'transparent'}}}}});
+  document.getElementById('dash-rec').innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem">${m12.map(m=>{const tot=(pagoArr[m-1]||0)+(pendArr[m-1]||0);return`<div style="background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:1rem;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'" onclick="document.getElementById('dash-mes').value=${m};renderDash()"><div style="font-size:.65rem;color:var(--txt3);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.4rem">${mN[m-1]}</div><div style="font-family:Cinzel,serif;font-size:1rem;color:var(--gold)">${fmtM(tot)}</div><div style="font-size:.7rem;color:var(--green);margin-top:.2rem">✓ ${fmtM(pagoArr[m-1]||0)}</div></div>`;}).join('')}</div>`;
 }
 
-// ── CLIENTES ──────────────────────────────────────────────────
+// ── CLIENTES ─────────────────────────────────────────────────
 async function renderClientes(q=''){
   loading('Carregando clientes...');
-  try{
-    const [cl,an,ca]=await Promise.all([Clientes.listar(),Animais.listar(),Categorias.listar()]);
-    DB.clientes=cl; DB.animais=an; DB.categorias=ca; hideLoad();
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
+  try{const[cl,an,ca]=await Promise.all([Clientes.listar(),Animais.listar(),Categorias.listar()]);DB.clientes=cl;DB.animais=an;DB.categorias=ca;hideLoad();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error');return}
   const list=DB.clientes.filter(c=>!q||c.nome.toLowerCase().includes(q.toLowerCase()));
-  const tb=document.getElementById('cli-tb');
-  const em=document.getElementById('cli-empty');
-  if(!list.length){ tb.innerHTML=''; em.style.display='block'; return; }
+  const tb=document.getElementById('cli-tb'),em=document.getElementById('cli-empty');
+  if(!list.length){tb.innerHTML='';em.style.display='block';return}
   em.style.display='none';
   tb.innerHTML=list.map(c=>{
-    const id=c._id||c.id;
-    const anims=getAnimaisCli(id);
-    const total=totalCli(id);
-    return `<tr>
-      <td>${c.nome}</td><td>${c.tel||'—'}</td><td>${c.cidade||'—'}</td>
-      <td style="text-align:center">${c.diaVenc||'—'}</td>
-      <td>${anims.length}</td>
-      <td style="font-family:Cinzel,serif;color:var(--gold)">${total?fmtM(total):'—'}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-ghost btn-sm" onclick="editCliente('${id}')">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="delCliente('${id}')">🗑</button>
-      </td>
-    </tr>`;
+    const id=getId(c),anims=getAnimCli(id),total=totalCli(id);
+    return`<tr><td style="font-weight:500;color:var(--txt)">${c.nome}</td><td>${c.tel||'—'}</td><td>${c.cidade||'—'}</td><td style="text-align:center">${c.diaVenc||'—'}</td><td style="text-align:center">${anims.length}</td><td style="font-family:Cinzel,serif;color:var(--gold)">${total?fmtM(total):'—'}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="editCli('${id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="delCli('${id}')">🗑</button></td></tr>`;
   }).join('');
 }
-function filterCli(q){ renderClientes(q); }
-function limparCliForm(){ document.getElementById('c-id').value=''; ['c-nome','c-tel','c-doc','c-cidade','c-obs'].forEach(id=>document.getElementById(id).value=''); document.getElementById('c-uf').value='PE'; document.getElementById('c-diavenc').value='5'; }
-function editCliente(id){
-  const c=DB.clientes.find(x=>(x._id||x.id)===id); if(!c) return;
+function filterCli(q){renderClientes(q)}
+function limparCli(){document.getElementById('c-id').value='';['c-nome','c-tel','c-doc','c-cidade','c-obs'].forEach(id=>document.getElementById(id).value='');document.getElementById('c-uf').value='PE';document.getElementById('c-diavenc').value='5';}
+function editCli(id){
+  const c=DB.clientes.find(x=>getId(x)===id);if(!c)return;
   document.getElementById('c-id').value=id;
-  document.getElementById('c-nome').value=c.nome||'';
-  document.getElementById('c-tel').value=c.tel||'';
-  document.getElementById('c-doc').value=c.doc||'';
-  document.getElementById('c-cidade').value=c.cidade||'';
-  document.getElementById('c-uf').value=c.uf||'PE';
-  document.getElementById('c-diavenc').value=c.diaVenc||5;
-  document.getElementById('c-obs').value=c.obs||'';
-  openModal('m-cli');
+  document.getElementById('c-nome').value=c.nome||'';document.getElementById('c-tel').value=c.tel||'';
+  document.getElementById('c-doc').value=c.doc||'';document.getElementById('c-cidade').value=c.cidade||'';
+  document.getElementById('c-uf').value=c.uf||'PE';document.getElementById('c-diavenc').value=c.diaVenc||5;
+  document.getElementById('c-obs').value=c.obs||'';openModal('m-cli');
 }
 async function salvarCliente(){
   const nome=document.getElementById('c-nome').value.trim();
-  if(!nome){ toast('Informe o nome','err'); return; }
+  if(!nome){toast('Informe o nome','error');return}
   let tel=document.getElementById('c-tel').value.replace(/\D/g,'');
-  if(tel.length>11&&tel.startsWith('55')) tel=tel.slice(2);
+  if(tel.length>11&&tel.startsWith('55'))tel=tel.slice(2);
   const dados={nome,tel,doc:document.getElementById('c-doc').value,email:'',cidade:document.getElementById('c-cidade').value,uf:document.getElementById('c-uf').value,obs:document.getElementById('c-obs').value,diaVenc:parseInt(document.getElementById('c-diavenc').value)||5};
   const id=document.getElementById('c-id').value;
   loading('Salvando...');
-  try{
-    if(id) await Clientes.atualizar(id,dados);
-    else   await Clientes.criar(dados);
-    DB.clientes=[]; hideLoad(); closeModal('m-cli'); toast('Cliente salvo!'); renderClientes();
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
+  try{if(id)await Clientes.atualizar(id,dados);else await Clientes.criar(dados);DB.clientes=[];hideLoad();closeModal('m-cli');toast('Cliente salvo!','success');renderClientes();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error')}
 }
-async function delCliente(id){
-  if(!confirm('Excluir cliente?')) return;
-  loading('Excluindo...'); try{ await Clientes.deletar(id); DB.clientes=[]; hideLoad(); toast('Removido'); renderClientes(); }
-  catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
+async function delCli(id){
+  if(!confirm('Excluir cliente?'))return;loading('Excluindo...');
+  try{await Clientes.deletar(id);DB.clientes=[];hideLoad();toast('Removido','success');renderClientes();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error')}
 }
 
-// ── ANIMAIS ───────────────────────────────────────────────────
+// ── ANIMAIS ──────────────────────────────────────────────────
 async function renderAnimais(q=''){
   loading('Carregando animais...');
-  try{
-    const [an,cl,ca]=await Promise.all([Animais.listar(),Clientes.listar(),Categorias.listar()]);
-    DB.animais=an; DB.clientes=cl; DB.categorias=ca; hideLoad();
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
+  try{const[an,cl,ca]=await Promise.all([Animais.listar(),Clientes.listar(),Categorias.listar()]);DB.animais=an;DB.clientes=cl;DB.categorias=ca;hideLoad();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error');return}
   const list=DB.animais.filter(a=>!q||a.nome.toLowerCase().includes(q.toLowerCase()));
-  const tb=document.getElementById('anim-tb');
-  const em=document.getElementById('anim-empty');
-  if(!list.length){ tb.innerHTML=''; em.style.display='block'; return; }
+  const tb=document.getElementById('anim-tb'),em=document.getElementById('anim-empty');
+  if(!list.length){tb.innerHTML='';em.style.display='block';return}
   em.style.display='none';
   tb.innerHTML=list.map(a=>{
-    const id=a._id||a.id;
-    const c=DB.clientes.find(x=>(x._id||x.id)===String(a.clienteId));
-    const preco=getCatPreco(a.categoria);
-    return `<tr>
-      <td style="font-weight:400;color:var(--txt)">${a.nome}</td>
-      <td>${c?c.nome:'<span style="color:var(--txt3)">Sem dono</span>'}</td>
-      <td>${a.categoria||'—'}</td>
-      <td style="font-family:Cinzel,serif;color:var(--gold)">${preco?fmtM(preco):'—'}</td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-ghost btn-sm" onclick="editAnimal('${id}')">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="delAnimal('${id}')">🗑</button>
-      </td>
-    </tr>`;
+    const id=getId(a),c=DB.clientes.find(x=>getId(x)===String(a.clienteId)),preco=getCatPreco(a.categoria);
+    return`<tr><td style="font-weight:500;color:var(--txt)">${a.nome}</td><td>${c?c.nome:'<span style="color:var(--txt3)">Sem dono</span>'}</td><td>${a.categoria||'—'}</td><td style="font-family:Cinzel,serif;color:var(--gold)">${preco?fmtM(preco):'—'}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="editAnim('${id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="delAnim('${id}')">🗑</button></td></tr>`;
   }).join('');
 }
-function filterAnim(q){ renderAnimais(q); }
-function limparAnimForm(){ document.getElementById('a-id').value=''; document.getElementById('a-nome').value=''; document.getElementById('a-obs').value=''; popularSelectsAnimal(); }
-function popularSelectsAnimal(){
-  const catSel=document.getElementById('a-cat'); catSel.innerHTML='<option value="">Sem categoria</option>';
-  DB.categorias.forEach(c=>{ const o=document.createElement('option'); o.value=c.nome; o.textContent=c.nome+' — '+fmtM(c.preco); catSel.appendChild(o); });
-  const cliSel=document.getElementById('a-cli'); cliSel.innerHTML='<option value="">Sem dono</option>';
-  DB.clientes.forEach(c=>{ const o=document.createElement('option'); o.value=c._id||c.id; o.textContent=c.nome; cliSel.appendChild(o); });
+function filterAnim(q){renderAnimais(q)}
+function limparAnim(){document.getElementById('a-id').value='';document.getElementById('a-nome').value='';document.getElementById('a-obs').value='';popularAnimSelects();}
+function popularAnimSelects(){
+  const cs=document.getElementById('a-cat');cs.innerHTML='<option value="">Sem categoria</option>';
+  DB.categorias.forEach(c=>{const o=document.createElement('option');o.value=c.nome;o.textContent=c.nome+' — '+fmtM(c.preco);cs.appendChild(o);});
+  const cl=document.getElementById('a-cli');cl.innerHTML='<option value="">Sem dono</option>';
+  DB.clientes.forEach(c=>{const o=document.createElement('option');o.value=getId(c);o.textContent=c.nome;cl.appendChild(o);});
 }
-function editAnimal(id){
-  const a=DB.animais.find(x=>(x._id||x.id)===id); if(!a) return;
-  document.getElementById('a-id').value=id;
-  document.getElementById('a-nome').value=a.nome||'';
-  document.getElementById('a-obs').value=a.obs||'';
-  popularSelectsAnimal();
-  document.getElementById('a-cat').value=a.categoria||'';
-  document.getElementById('a-cli').value=a.clienteId||'';
-  openModal('m-anim');
+function editAnim(id){
+  const a=DB.animais.find(x=>getId(x)===id);if(!a)return;
+  document.getElementById('a-id').value=id;document.getElementById('a-nome').value=a.nome||'';document.getElementById('a-obs').value=a.obs||'';
+  popularAnimSelects();document.getElementById('a-cat').value=a.categoria||'';document.getElementById('a-cli').value=a.clienteId||'';openModal('m-anim');
 }
 async function salvarAnimal(){
   const nome=document.getElementById('a-nome').value.trim();
-  if(!nome){ toast('Informe o nome do animal','err'); return; }
+  if(!nome){toast('Informe o nome','error');return}
   const dados={nome:nome.charAt(0).toUpperCase()+nome.slice(1),categoria:document.getElementById('a-cat').value,clienteId:document.getElementById('a-cli').value||null,obs:document.getElementById('a-obs').value};
-  const id=document.getElementById('a-id').value;
-  loading('Salvando...');
-  try{
-    if(id) await Animais.atualizar(id,dados);
-    else   await Animais.criar(dados);
-    DB.animais=[]; hideLoad(); closeModal('m-anim'); toast('Animal salvo!'); renderAnimais();
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
+  const id=document.getElementById('a-id').value;loading('Salvando...');
+  try{if(id)await Animais.atualizar(id,dados);else await Animais.criar(dados);DB.animais=[];hideLoad();closeModal('m-anim');toast('Animal salvo!','success');renderAnimais();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error')}
 }
-async function delAnimal(id){
-  if(!confirm('Excluir animal?')) return;
-  loading('Excluindo...'); try{ await Animais.deletar(id); DB.animais=[]; hideLoad(); toast('Removido'); renderAnimais(); }
-  catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
+async function delAnim(id){
+  if(!confirm('Excluir animal?'))return;loading('Excluindo...');
+  try{await Animais.deletar(id);DB.animais=[];hideLoad();toast('Removido','success');renderAnimais();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error')}
 }
 
 // ── NOVA FATURA ───────────────────────────────────────────────
 let iCount=0;
 async function initNova(){
   loading('Carregando...');
-  try{
-    const [cl,an,ca]=await Promise.all([Clientes.listar(),Animais.listar(),Categorias.listar()]);
-    DB.clientes=cl; DB.animais=an; DB.categorias=ca; hideLoad();
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
-  const sel=document.getElementById('f-cli'); sel.innerHTML='<option value="">Selecionar...</option>';
-  DB.clientes.forEach(c=>{ const o=document.createElement('option'); o.value=c._id||c.id; o.textContent=c.nome; sel.appendChild(o); });
-  document.getElementById('f-emissao').value=today();
-  document.getElementById('f-venc').value='';
-  document.getElementById('f-obs').value='';
-  document.getElementById('f-items').innerHTML='';
-  iCount=0; addItem(); calcTotal();
+  try{const[cl,an,ca]=await Promise.all([Clientes.listar(),Animais.listar(),Categorias.listar()]);DB.clientes=cl;DB.animais=an;DB.categorias=ca;hideLoad();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error');return}
+  const sel=document.getElementById('f-cli');sel.innerHTML='<option value="">Selecionar...</option>';
+  DB.clientes.forEach(c=>{const o=document.createElement('option');o.value=getId(c);o.textContent=c.nome;sel.appendChild(o);});
+  document.getElementById('f-emissao').value=today();document.getElementById('f-venc').value='';document.getElementById('f-obs').value='';
+  document.getElementById('f-items').innerHTML='';iCount=0;addItem();calcTotal();
 }
 function preencherItens(){
   const cid=document.getElementById('f-cli').value;
-  document.getElementById('f-items').innerHTML=''; iCount=0;
+  document.getElementById('f-items').innerHTML='';iCount=0;
   if(cid){
-    const c=DB.clientes.find(x=>(x._id||x.id)===cid);
-    if(c?.diaVenc){ const d=new Date(); d.setDate(parseInt(c.diaVenc)); if(d<=new Date()) d.setMonth(d.getMonth()+1); document.getElementById('f-venc').value=d.toISOString().split('T')[0]; }
-    getAnimaisCli(cid).filter(a=>a.categoria&&getCatPreco(a.categoria)>0).forEach(a=>{ iCount++; addItemRow(iCount,a.nome+' — '+a.categoria,1,getCatPreco(a.categoria)); });
+    const c=DB.clientes.find(x=>getId(x)===cid);
+    if(c?.diaVenc){const d=new Date();d.setDate(parseInt(c.diaVenc));if(d<=new Date())d.setMonth(d.getMonth()+1);document.getElementById('f-venc').value=d.toISOString().split('T')[0];}
+    getAnimCli(cid).filter(a=>a.categoria&&getCatPreco(a.categoria)>0).forEach(a=>{iCount++;addItemRow(iCount,a.nome+' — '+a.categoria,1,getCatPreco(a.categoria));});
   }
-  if(!iCount) addItem(); calcTotal();
+  if(!iCount)addItem();calcTotal();
 }
-function addItem(){ iCount++; addItemRow(iCount,'',1,0); }
+function addItem(){iCount++;addItemRow(iCount,'',1,0);}
 function addItemRow(i,desc,qty,price){
-  const tr=document.createElement('tr'); tr.id='ir-'+i;
-  tr.innerHTML=`<td style="padding:.4rem"><input style="background:var(--card2);border:1px solid var(--b2);color:var(--txt);padding:.5rem .7rem;font-size:.82rem;width:100%;font-family:Lato,sans-serif;outline:none" id="id-${i}" value="${desc}" placeholder="Descrição..."/></td>
-    <td style="padding:.4rem"><input type="number" style="background:var(--card2);border:1px solid var(--b2);color:var(--txt);padding:.5rem .7rem;font-size:.82rem;width:100%;font-family:Lato,sans-serif;outline:none" id="iq-${i}" value="${qty}" min="1" oninput="calcTotal()"/></td>
-    <td style="padding:.4rem"><input type="number" style="background:var(--card2);border:1px solid var(--b2);color:var(--txt);padding:.5rem .7rem;font-size:.82rem;width:100%;font-family:Lato,sans-serif;outline:none" id="ip-${i}" value="${price}" step="0.01" oninput="calcTotal()"/></td>
-    <td id="it-${i}" style="padding:.4rem .8rem;font-family:Cinzel,serif;color:var(--gold);font-size:.82rem;white-space:nowrap">${fmtM(qty*price)}</td>
-    <td style="padding:.4rem"><button class="btn btn-danger btn-sm" onclick="document.getElementById('ir-${i}').remove();calcTotal()" style="padding:.3rem .5rem">✕</button></td>`;
+  const tr=document.createElement('tr');tr.id='ir-'+i;
+  tr.innerHTML=`<td style="padding:.4rem"><input id="id-${i}" value="${desc}" placeholder="Descrição..."/></td><td style="padding:.4rem"><input type="number" id="iq-${i}" value="${qty}" min="1" oninput="calcTotal()" style="text-align:center"/></td><td style="padding:.4rem"><input type="number" id="ip-${i}" value="${price}" step="0.01" oninput="calcTotal()"/></td><td id="it-${i}" style="padding:.4rem .8rem;font-family:Cinzel,serif;color:var(--gold);font-size:.88rem;white-space:nowrap">${fmtM(qty*price)}</td><td style="padding:.4rem"><button class="btn btn-danger btn-sm" onclick="document.getElementById('ir-${i}').remove();calcTotal()" style="padding:.3rem .6rem">✕</button></td>`;
   document.getElementById('f-items').appendChild(tr);
 }
 function calcTotal(){
   let t=0;
-  document.querySelectorAll('#f-items tr').forEach(tr=>{ const i=tr.id.replace('ir-',''); const q=parseFloat(document.getElementById('iq-'+i)?.value||0); const p=parseFloat(document.getElementById('ip-'+i)?.value||0); const tot=q*p; t+=tot; const el=document.getElementById('it-'+i); if(el) el.textContent=fmtM(tot); });
+  document.querySelectorAll('#f-items tr').forEach(tr=>{const i=tr.id.replace('ir-','');const q=parseFloat(document.getElementById('iq-'+i)?.value||0);const p=parseFloat(document.getElementById('ip-'+i)?.value||0);const tot=q*p;t+=tot;const el=document.getElementById('it-'+i);if(el)el.textContent=fmtM(tot);});
   document.getElementById('f-total').textContent=fmtM(t);
 }
 function getItems(){
   const items=[];
-  document.querySelectorAll('#f-items tr').forEach(tr=>{ const i=tr.id.replace('ir-',''); const desc=document.getElementById('id-'+i)?.value||''; const qty=parseFloat(document.getElementById('iq-'+i)?.value||0); const price=parseFloat(document.getElementById('ip-'+i)?.value||0); if(desc||price) items.push({desc,qty,price,total:qty*price}); });
+  document.querySelectorAll('#f-items tr').forEach(tr=>{const i=tr.id.replace('ir-','');const desc=document.getElementById('id-'+i)?.value||'';const qty=parseFloat(document.getElementById('iq-'+i)?.value||0);const price=parseFloat(document.getElementById('ip-'+i)?.value||0);if(desc||price)items.push({desc,qty,price,total:qty*price});});
   return items;
 }
 async function salvarFatura(){
-  const cid=document.getElementById('f-cli').value;
-  if(!cid){ toast('Selecione um cliente','err'); return; }
-  const itens=getItems();
-  if(!itens.length){ toast('Adicione ao menos um item','err'); return; }
+  const cid=document.getElementById('f-cli').value;if(!cid){toast('Selecione um cliente','error');return}
+  const itens=getItems();if(!itens.length){toast('Adicione ao menos um item','error');return}
   const total=itens.reduce((s,i)=>s+i.total,0);
-  const fat={clienteId:cid,emissao:document.getElementById('f-emissao').value,vencimento:document.getElementById('f-venc').value,forma:document.getElementById('f-forma').value,total,obs:document.getElementById('f-obs').value,status:'pendente',itens};
   loading('Salvando fatura...');
   try{
-    const saved=await Faturas.criar(fat);
-    DB.faturas=[];
-    hideLoad(); toast('Fatura #'+String(saved.num).padStart(4,'0')+' salva!');
-    setTimeout(()=>goTo('faturas'),800);
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
+    const saved=await Faturas.criar({clienteId:cid,emissao:document.getElementById('f-emissao').value,vencimento:document.getElementById('f-venc').value,forma:document.getElementById('f-forma').value,total,obs:document.getElementById('f-obs').value,status:'pendente',itens});
+    DB.faturas=[];hideLoad();toast('Fatura #'+String(saved.num).padStart(4,'0')+' salva!','success');setTimeout(()=>goTo('faturas'),800);
+  }catch(e){hideLoad();toast('Erro: '+e.message,'error')}
 }
 
-// ── LOTE ──────────────────────────────────────────────────────
+// ── LOTE ─────────────────────────────────────────────────────
 async function initLote(){
   loading('Carregando...');
-  try{
-    const [cl,an,ca]=await Promise.all([Clientes.listar(),Animais.listar(),Categorias.listar()]);
-    DB.clientes=cl; DB.animais=an; DB.categorias=ca; hideLoad();
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
-  const d=new Date(); d.setMonth(d.getMonth()+1);
-  document.getElementById('lote-mes').value=d.toISOString().slice(0,7);
+  try{const[cl,an,ca]=await Promise.all([Clientes.listar(),Animais.listar(),Categorias.listar()]);DB.clientes=cl;DB.animais=an;DB.categorias=ca;hideLoad();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error');return}
+  const d=new Date();d.setMonth(d.getMonth()+1);document.getElementById('lote-mes').value=d.toISOString().slice(0,7);
   renderLoteLista();
 }
 function renderLoteLista(){
   const container=document.getElementById('lote-lista');
-  const comAnimais=DB.clientes.filter(c=>getAnimaisCli(c._id||c.id).some(a=>a.categoria&&getCatPreco(a.categoria)>0));
-  if(!comAnimais.length){ container.innerHTML='<div class="empty"><div class="ei">🐴</div><p>Nenhum cliente com animais cadastrados</p></div>'; document.getElementById('lote-summary').style.display='none'; return; }
-  container.innerHTML=comAnimais.map(c=>{
-    const id=c._id||c.id;
-    const anims=getAnimaisCli(id).filter(a=>a.categoria&&getCatPreco(a.categoria)>0);
+  const com=DB.clientes.filter(c=>getAnimCli(getId(c)).some(a=>a.categoria&&getCatPreco(a.categoria)>0));
+  if(!com.length){container.innerHTML='<div class="empty-state"><div class="empty-icon">🐴</div><p>Nenhum cliente com animais cadastrados</p></div>';document.getElementById('lote-summary').style.display='none';return;}
+  container.innerHTML=com.map(c=>{
+    const id=getId(c),anims=getAnimCli(id).filter(a=>a.categoria&&getCatPreco(a.categoria)>0);
     const total=anims.reduce((s,a)=>s+getCatPreco(a.categoria),0);
     const desc=anims.map(a=>a.nome+' ('+a.categoria+')').join(' · ');
-    return `<div class="lote-cli sel" id="lc-${id}" onclick="toggleLote('${id}')">
-      <input type="checkbox" checked id="chk-${id}" onclick="event.stopPropagation();toggleLote('${id}')"/>
-      <div class="lc-nome">${c.nome}</div>
-      <div class="lc-animais">${desc}</div>
-      <div class="lc-val">${fmtM(total)}</div>
-    </div>`;
+    return`<div class="lote-item sel" id="lc-${id}" onclick="toggleLote('${id}')"><input type="checkbox" checked id="chk-${id}" onclick="event.stopPropagation();toggleLote('${id}')"/><div class="li-nome">${c.nome}</div><div class="li-animais">${desc}</div><div class="li-val">${fmtM(total)}</div></div>`;
   }).join('');
   updateLoteSummary();
 }
-function toggleLote(id){ const el=document.getElementById('lc-'+id); const chk=document.getElementById('chk-'+id); el.classList.toggle('sel'); chk.checked=el.classList.contains('sel'); updateLoteSummary(); }
-function selTodos(v){ document.querySelectorAll('.lote-cli').forEach(el=>{ const id=el.id.replace('lc-',''); const chk=document.getElementById('chk-'+id); if(v){el.classList.add('sel');chk.checked=true;}else{el.classList.remove('sel');chk.checked=false;} }); updateLoteSummary(); }
-function updateLoteSummary(){ const sels=document.querySelectorAll('.lote-cli.sel'); let total=0; sels.forEach(el=>{ total+=totalCli(el.id.replace('lc-','')); }); document.getElementById('ls-qtd').textContent=sels.length; document.getElementById('ls-total').textContent=fmtM(total); document.getElementById('lote-summary').style.display=sels.length?'flex':'none'; }
+function toggleLote(id){const el=document.getElementById('lc-'+id),chk=document.getElementById('chk-'+id);el.classList.toggle('sel');chk.checked=el.classList.contains('sel');updateLoteSummary();}
+function selTodos(v){document.querySelectorAll('.lote-item').forEach(el=>{const id=el.id.replace('lc-',''),chk=document.getElementById('chk-'+id);if(v){el.classList.add('sel');chk.checked=true;}else{el.classList.remove('sel');chk.checked=false;}});updateLoteSummary();}
+function updateLoteSummary(){const sels=document.querySelectorAll('.lote-item.sel');let t=0;sels.forEach(el=>{t+=totalCli(el.id.replace('lc-',''));});document.getElementById('ls-qtd').textContent=sels.length;document.getElementById('ls-total').textContent=fmtM(t);document.getElementById('lote-summary').style.display=sels.length?'flex':'none';}
 async function gerarLote(){
-  const mes=document.getElementById('lote-mes').value;
-  const dia=parseInt(document.getElementById('lote-dia').value)||5;
-  const forma=document.getElementById('lote-forma').value;
-  if(!mes){ toast('Selecione o mês','err'); return; }
-  const clienteIds=[];
-  document.querySelectorAll('.lote-cli.sel').forEach(el=>clienteIds.push(el.id.replace('lc-','')));
-  if(!clienteIds.length){ toast('Selecione ao menos um cliente','err'); return; }
-  const [ano,mesN]=mes.split('-');
-  const vencimento=`${ano}-${mesN}-${String(dia).padStart(2,'0')}`;
-  document.getElementById('btn-lote').disabled=true;
-  loading('Gerando faturas em lote...');
+  const mes=document.getElementById('lote-mes').value,dia=parseInt(document.getElementById('lote-dia').value)||5,forma=document.getElementById('lote-forma').value;
+  if(!mes){toast('Selecione o mês','error');return}
+  const clienteIds=[];document.querySelectorAll('.lote-item.sel').forEach(el=>clienteIds.push(el.id.replace('lc-','')));
+  if(!clienteIds.length){toast('Selecione ao menos um cliente','error');return}
+  const[ano,mesN]=mes.split('-'),vencimento=`${ano}-${mesN}-${String(dia).padStart(2,'0')}`;
+  document.getElementById('btn-lote').disabled=true;loading('Gerando faturas...');
   try{
     const r=await Faturas.lote({clienteIds,vencimento,forma,mes});
-    DB.faturas=[];
-    hideLoad(); document.getElementById('btn-lote').disabled=false;
-    document.getElementById('lote-status').textContent=r.msg||'Faturas geradas!';
-    toast(r.msg||'Faturas geradas!');
-  }catch(e){ hideLoad(); document.getElementById('btn-lote').disabled=false; toast('Erro: '+e.message,'err'); }
+    DB.faturas=[];hideLoad();document.getElementById('btn-lote').disabled=false;
+    document.getElementById('lote-status').textContent=r.msg||'Faturas geradas!';toast(r.msg||'Faturas geradas!','success');
+  }catch(e){hideLoad();document.getElementById('btn-lote').disabled=false;toast('Erro: '+e.message,'error')}
 }
 
-// ── FATURAS ───────────────────────────────────────────────────
+// ── FATURAS ──────────────────────────────────────────────────
 async function renderFaturas(){
   loading('Carregando faturas...');
-  try{
-    const [fa,cl]=await Promise.all([Faturas.listar(),Clientes.listar()]);
-    DB.faturas=fa; DB.clientes=cl; hideLoad();
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
-  // Popular filtro cliente
-  const cf=document.getElementById('fat-cli-filter');
-  cf.innerHTML='<option value="">Todos clientes</option>';
-  DB.clientes.forEach(c=>{ const o=document.createElement('option'); o.value=c._id||c.id; o.textContent=c.nome; cf.appendChild(o); });
+  try{const[fa,cl]=await Promise.all([Faturas.listar(),Clientes.listar()]);DB.faturas=fa;DB.clientes=cl;hideLoad();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error');return}
+  const cf=document.getElementById('fat-cli-f');cf.innerHTML='<option value="">Todos clientes</option>';
+  DB.clientes.forEach(c=>{const o=document.createElement('option');o.value=getId(c);o.textContent=c.nome;cf.appendChild(o);});
   filterFat();
 }
 function filterFat(){
-  const q=document.getElementById('fat-search')?.value.toLowerCase()||'';
-  const status=document.getElementById('fat-status')?.value||'';
-  const cliId=document.getElementById('fat-cli-filter')?.value||'';
-  const list=DB.faturas.filter(f=>{
-    const c=DB.clientes.find(x=>(x._id||x.id)===f.clienteId);
-    return (!q||String(f.num).includes(q)||(c&&c.nome.toLowerCase().includes(q)))&&(!status||f.status===status)&&(!cliId||f.clienteId===cliId);
-  }).slice().sort((a,b)=>parseInt(b.num)-parseInt(a.num));
-  const totalFilt=list.reduce((s,f)=>s+parseFloat(f.total||0),0);
-  const pendFilt=list.filter(f=>f.status==='pendente').reduce((s,f)=>s+parseFloat(f.total||0),0);
-  const pagoFilt=list.filter(f=>f.status==='pago').reduce((s,f)=>s+parseFloat(f.total||0),0);
-  document.getElementById('fat-resumo').innerHTML=list.length?`
-    <span style="font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.15em;color:var(--txt2)">${list.length} fatura(s) · <strong style="color:var(--gold)">${fmtM(totalFilt)}</strong></span>
-    <span style="font-family:Cinzel,serif;font-size:.65rem;color:var(--orange)">Pendente: <strong>${fmtM(pendFilt)}</strong></span>
-    <span style="font-family:Cinzel,serif;font-size:.65rem;color:var(--green)">Pago: <strong>${fmtM(pagoFilt)}</strong></span>`:'';
-  const tb=document.getElementById('fat-tb'); const em=document.getElementById('fat-empty');
-  if(!list.length){ tb.innerHTML=''; em.style.display='block'; return; }
+  const q=document.getElementById('fat-search')?.value.toLowerCase()||'',status=document.getElementById('fat-status')?.value||'',cliId=document.getElementById('fat-cli-f')?.value||'';
+  const list=DB.faturas.filter(f=>{const c=DB.clientes.find(x=>getId(x)===f.clienteId);return(!q||String(f.num).includes(q)||(c&&c.nome.toLowerCase().includes(q)))&&(!status||f.status===status)&&(!cliId||f.clienteId===cliId);}).slice().sort((a,b)=>parseInt(b.num)-parseInt(a.num));
+  const totalF=list.reduce((s,f)=>s+parseFloat(f.total||0),0);
+  const pendF=list.filter(f=>f.status==='pendente').reduce((s,f)=>s+parseFloat(f.total||0),0);
+  const pagoF=list.filter(f=>f.status==='pago').reduce((s,f)=>s+parseFloat(f.total||0),0);
+  document.getElementById('fat-resumo').innerHTML=list.length?`<span>${list.length} fatura(s) · Total: <strong style="color:var(--gold)">${fmtM(totalF)}</strong></span><span style="color:var(--orange)">Pendente: <strong>${fmtM(pendF)}</strong></span><span style="color:var(--green)">Pago: <strong>${fmtM(pagoF)}</strong></span>`:'';
+  const tb=document.getElementById('fat-tb'),em=document.getElementById('fat-empty');
+  if(!list.length){tb.innerHTML='';em.style.display='block';return}
   em.style.display='none';
   tb.innerHTML=list.map(f=>{
-    const id=f._id||f.id;
-    const c=DB.clientes.find(x=>(x._id||x.id)===f.clienteId);
-    return `<tr>
-      <td style="font-family:Cinzel,serif;color:var(--txt3)">#${String(f.num).padStart(4,'0')}</td>
-      <td>${c?c.nome:'—'}</td>
-      <td style="font-family:Cinzel,serif;color:var(--gold)">${fmtM(f.total)}</td>
-      <td>${fmtD(f.vencimento)}</td>
-      <td><span class="badge badge-${f.status}">${f.status}</span></td>
-      <td style="white-space:nowrap">
-        <button class="btn btn-ghost btn-sm" onclick="gerarPDF('${id}')">📄</button>
-        ${f.status==='pendente'?`<button class="btn btn-green btn-sm" onclick="abrirPag('${id}')">✓</button>`:''}
-        <button class="btn btn-danger btn-sm" onclick="delFatura('${id}')">🗑</button>
-      </td>
-    </tr>`;
+    const id=getId(f)||f.id,c=DB.clientes.find(x=>getId(x)===f.clienteId);
+    return`<tr><td style="font-family:Cinzel,serif;color:var(--txt3);font-size:.82rem">#${String(f.num).padStart(4,'0')}</td><td style="font-weight:500;color:var(--txt)">${c?c.nome:'—'}</td><td style="font-family:Cinzel,serif;color:var(--gold)">${fmtM(f.total)}</td><td>${fmtD(f.vencimento)}</td><td><span class="badge badge-${f.status}">${f.status}</span></td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="gerarPDF('${id}')">📄</button> ${f.status==='pendente'?`<button class="btn btn-success btn-sm" onclick="abrirPag('${id}')">✓ Pago</button>`:''} <button class="btn btn-danger btn-sm" onclick="delFatura('${id}')">🗑</button></td></tr>`;
   }).join('');
 }
-async function delFatura(id){ if(!confirm('Excluir fatura?')) return; loading('Excluindo...'); try{ await Faturas.deletar(id); DB.faturas=DB.faturas.filter(f=>(f._id||f.id)!==id); hideLoad(); filterFat(); toast('Removida'); }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); } }
+async function delFatura(id){if(!confirm('Excluir fatura?'))return;loading('Excluindo...');try{await Faturas.deletar(id);DB.faturas=DB.faturas.filter(f=>getId(f)!==id);hideLoad();filterFat();toast('Removida','success');}catch(e){hideLoad();toast('Erro: '+e.message,'error')}}
 
-// ── PAGAMENTOS ────────────────────────────────────────────────
+// ── PAGAMENTOS ───────────────────────────────────────────────
 async function renderPagamentos(){
   loading('Carregando...');
-  try{ const [fa,cl]=await Promise.all([Faturas.listar(),Clientes.listar()]); DB.faturas=fa; DB.clientes=cl; hideLoad(); }
-  catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
+  try{const[fa,cl]=await Promise.all([Faturas.listar(),Clientes.listar()]);DB.faturas=fa;DB.clientes=cl;hideLoad();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error');return}
   const pago=DB.faturas.filter(f=>f.status==='pago').reduce((s,f)=>s+parseFloat(f.total||0),0);
   const pend=DB.faturas.filter(f=>f.status==='pendente').reduce((s,f)=>s+parseFloat(f.total||0),0);
   document.getElementById('pag-cards').innerHTML=`
-    <div class="dc"><div class="lbl">Total Recebido</div><div class="val" style="color:var(--green)">${fmtM(pago)}</div></div>
-    <div class="dc"><div class="lbl">A Receber</div><div class="val" style="color:var(--orange)">${fmtM(pend)}</div></div>`;
+    <div class="dash-card"><div class="dc-label">Total Recebido</div><div class="dc-value" style="color:var(--green)">${fmtM(pago)}</div></div>
+    <div class="dash-card"><div class="dc-label">A Receber</div><div class="dc-value" style="color:var(--orange)">${fmtM(pend)}</div></div>`;
   const list=DB.faturas.slice().sort((a,b)=>parseInt(b.num)-parseInt(a.num));
-  const tb=document.getElementById('pag-tb'); const em=document.getElementById('pag-empty');
-  if(!list.length){ tb.innerHTML=''; em.style.display='block'; return; }
+  const tb=document.getElementById('pag-tb'),em=document.getElementById('pag-empty');
+  if(!list.length){tb.innerHTML='';em.style.display='block';return}
   em.style.display='none';
   tb.innerHTML=list.map(f=>{
-    const id=f._id||f.id;
-    const c=DB.clientes.find(x=>(x._id||x.id)===f.clienteId);
-    return `<tr>
-      <td>#${String(f.num).padStart(4,'0')}</td><td>${c?c.nome:'—'}</td>
-      <td style="font-family:Cinzel,serif;color:var(--gold)">${fmtM(f.total)}</td>
-      <td>${f.pagForma||f.forma||'—'}</td><td>${fmtD(f.pagData)||'—'}</td>
-      <td><span class="badge badge-${f.status}">${f.status}</span></td>
-      <td>${f.status==='pendente'?`<button class="btn btn-green btn-sm" onclick="abrirPag('${id}')">Receber</button>`:'<span style="color:var(--green);font-size:.75rem">✓ Pago</span>'}</td>
-    </tr>`;
+    const id=getId(f)||f.id,c=DB.clientes.find(x=>getId(x)===f.clienteId);
+    return`<tr><td style="font-family:Cinzel,serif;font-size:.82rem">#${String(f.num).padStart(4,'0')}</td><td style="font-weight:500;color:var(--txt)">${c?c.nome:'—'}</td><td style="font-family:Cinzel,serif;color:var(--gold)">${fmtM(f.total)}</td><td>${f.pagForma||f.forma||'—'}</td><td>${fmtD(f.pagData)||'—'}</td><td><span class="badge badge-${f.status}">${f.status}</span></td><td>${f.status==='pendente'?`<button class="btn btn-success btn-sm" onclick="abrirPag('${id}')">Receber</button>`:'<span style="color:var(--green);font-size:.82rem;font-weight:500">✓ Pago</span>'}</td></tr>`;
   }).join('');
 }
-function abrirPag(id){ document.getElementById('p-fid').value=id; document.getElementById('p-data').value=today(); document.getElementById('p-obs').value=''; openModal('m-pag'); }
+function abrirPag(id){document.getElementById('p-fid').value=id;document.getElementById('p-data').value=today();document.getElementById('p-obs').value='';openModal('m-pag');}
 async function confirmarPag(){
   const id=document.getElementById('p-fid').value;
   const dados={pagData:document.getElementById('p-data').value,pagForma:document.getElementById('p-forma').value,pagObs:document.getElementById('p-obs').value};
   loading('Confirmando...');
-  try{
-    await Faturas.pagar(id,dados);
-    const i=DB.faturas.findIndex(f=>(f._id||f.id)===id);
-    if(i>=0) DB.faturas[i]={...DB.faturas[i],status:'pago',...dados};
-    hideLoad(); closeModal('m-pag'); renderPagamentos(); filterFat(); toast('Pago! ✓');
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
+  try{await Faturas.pagar(id,dados);const i=DB.faturas.findIndex(f=>getId(f)===id);if(i>=0)DB.faturas[i]={...DB.faturas[i],status:'pago',...dados};hideLoad();closeModal('m-pag');renderPagamentos();filterFat();toast('Pagamento confirmado!','success');}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error')}
 }
 
-// ── CONFIG / CATEGORIAS ───────────────────────────────────────
+// ── CONFIG ────────────────────────────────────────────────────
 async function renderConfig(){
-  loading('Carregando...');
-  try{ DB.categorias=await Categorias.listar(); hideLoad(); }
-  catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
+  loading('Carregando...');try{DB.categorias=await Categorias.listar();hideLoad();}catch(e){hideLoad();toast('Erro','error');return}
   document.getElementById('cats-lista').innerHTML=DB.categorias.map(c=>{
-    const id=c._id||c.id;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;background:var(--card2);border:1px solid var(--b2);margin-bottom:2px">
-      <span style="font-size:.9rem;color:var(--txt)">${c.nome}</span>
-      <div style="display:flex;align-items:center;gap:1rem">
-        <span style="font-family:Cinzel,serif;color:var(--gold)">${fmtM(c.preco)}</span>
-        <button class="btn btn-ghost btn-sm" onclick="editCategoria('${id}')">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="delCategoria('${id}')">🗑</button>
-      </div>
-    </div>`;
+    const id=getId(c);
+    return`<div class="cat-item"><div class="cat-nome">${c.nome}</div><div style="display:flex;align-items:center;gap:1rem"><div class="cat-preco">${fmtM(c.preco)}</div><div class="cat-acoes"><button class="btn btn-ghost btn-sm" onclick="editCat('${id}')">✏️</button><button class="btn btn-danger btn-sm" onclick="delCat('${id}')">🗑</button></div></div></div>`;
   }).join('');
 }
-function editCategoria(id){
-  const c=DB.categorias.find(x=>(x._id||x.id)===id); if(!c) return;
-  document.getElementById('cat-id').value=id;
-  document.getElementById('cat-nome').value=c.nome;
-  document.getElementById('cat-preco').value=c.preco;
-  openModal('m-cat');
+function editCat(id){const c=DB.categorias.find(x=>getId(x)===id);if(!c)return;document.getElementById('cat-id').value=id;document.getElementById('cat-nome').value=c.nome;document.getElementById('cat-preco').value=c.preco;openModal('m-cat');}
+async function salvarCat(){
+  const nome=document.getElementById('cat-nome').value.trim(),preco=parseFloat(document.getElementById('cat-preco').value);
+  if(!nome||!preco){toast('Preencha nome e preço','error');return}
+  const id=document.getElementById('cat-id').value;loading('Salvando...');
+  try{if(id)await Categorias.atualizar(id,{nome,preco});else await Categorias.criar({nome,preco});DB.categorias=[];hideLoad();closeModal('m-cat');toast('Categoria salva!','success');renderConfig();}
+  catch(e){hideLoad();toast('Erro: '+e.message,'error')}
 }
-async function salvarCategoria(){
-  const nome=document.getElementById('cat-nome').value.trim();
-  const preco=parseFloat(document.getElementById('cat-preco').value);
-  if(!nome||!preco){ toast('Preencha nome e preço','err'); return; }
-  const id=document.getElementById('cat-id').value;
-  loading('Salvando...');
-  try{
-    if(id) await Categorias.atualizar(id,{nome,preco});
-    else   await Categorias.criar({nome,preco});
-    DB.categorias=[]; hideLoad(); closeModal('m-cat'); toast('Categoria salva!'); renderConfig();
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
-}
-async function delCategoria(id){ if(!confirm('Excluir categoria?')) return; loading('Excluindo...'); try{ await Categorias.deletar(id); DB.categorias=[]; hideLoad(); renderConfig(); toast('Removida'); }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); } }
+async function delCat(id){if(!confirm('Excluir categoria?'))return;loading('Excluindo...');try{await Categorias.deletar(id);DB.categorias=[];hideLoad();renderConfig();toast('Removida','success');}catch(e){hideLoad();toast('Erro: '+e.message,'error')}}
 
 // ── PDF ───────────────────────────────────────────────────────
 async function gerarPDF(fatId){
   loading('Gerando PDF...');
-  try{
-    const fat=await Faturas.buscar(fatId);
-    hideLoad(); gerarPDFObj(fat, fat.itens||[]);
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
+  try{const fat=await Faturas.buscar(fatId),itens=await Faturas.itens(fatId);hideLoad();gerarPDFObj(fat,itens);}
+  catch(e){hideLoad();toast('Erro ao gerar PDF','error')}
 }
-function gerarPDFObj(f,itens=[]){
-  const {jsPDF}=window.jspdf; const doc=new jsPDF();
-  const cli=DB.clientes.find(c=>(c._id||c.id)===f.clienteId);
-  const g=[201,168,76],dk=[10,10,10],gr=[60,55,50],lg=[200,195,188];
-  doc.setFillColor(...dk); doc.rect(0,0,210,40,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(...g); doc.text('HARAS ET',14,18);
-  doc.setFontSize(8); doc.setTextColor(...lg); doc.text('Criatório Mangalarga Marchador · @haras_et · Aldeia - PE',14,25); doc.text('Marcha Picada · Pernambuco · Brasil',14,31);
-  doc.setFillColor(...g); doc.rect(145,8,55,24,'F'); doc.setTextColor(...dk); doc.setFontSize(14); doc.text('FATURA',147,19); doc.setFontSize(10); doc.text('#'+String(f.num).padStart(4,'0'),147,27);
-  doc.setDrawColor(...g); doc.setLineWidth(0.5); doc.line(0,40,210,40);
+function gerarPDFObj(f,itens){
+  const{jsPDF}=window.jspdf,doc=new jsPDF();
+  const g=[184,134,11],dk=[61,46,30],gr=[122,106,90],lg=[200,195,185],bg=[250,247,242];
+  doc.setFillColor(...bg);doc.rect(0,0,210,40,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(22);doc.setTextColor(...g);doc.text('HARAS ET',14,18);
+  doc.setFontSize(8);doc.setTextColor(...gr);doc.text('Criatório Mangalarga Marchador · Marcha Picada · @haras_et',14,25);doc.text('Aldeia · Pernambuco · Brasil',14,31);
+  doc.setDrawColor(...g);doc.setLineWidth(1);doc.line(0,40,210,40);
+  doc.setFillColor(...g);doc.rect(145,8,55,24,'F');doc.setTextColor(250,247,242);doc.setFontSize(14);doc.text('FATURA',147,19);doc.setFontSize(10);doc.text('#'+String(f.num).padStart(4,'0'),147,27);
   let y=50;
-  doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...g); doc.text('CLIENTE',14,y); doc.text('EMISSÃO',100,y); doc.text('VENCIMENTO',145,y); y+=5;
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...gr);
-  doc.text(cli?cli.nome:'—',14,y); doc.text(cli&&cli.tel?cli.tel:'',14,y+5); doc.text(fmtD(f.emissao),100,y); doc.text(fmtD(f.vencimento),145,y);
-  doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...g); doc.text('FORMA',100,y+10); doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...gr); doc.text(f.forma||'',100,y+15); y+=24;
-  doc.setFillColor(...dk); doc.rect(14,y,182,7,'F'); doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...g); doc.text('DESCRIÇÃO',16,y+5); doc.text('QTD',118,y+5); doc.text('UNIT.',136,y+5); doc.text('TOTAL',168,y+5); y+=10;
-  doc.setFont('helvetica','normal'); doc.setFontSize(9);
-  itens.forEach((item,idx)=>{ if(idx%2===0){doc.setFillColor(248,245,240);doc.rect(14,y-4,182,7,'F');} doc.setTextColor(...gr); doc.text(String(item.desc||''),16,y+1,{maxWidth:98}); doc.text(String(item.qty||1),120,y+1); doc.text(fmtM(item.price),136,y+1); doc.text(fmtM(item.total),168,y+1); y+=8; });
-  y+=4; doc.setDrawColor(...g); doc.setLineWidth(0.3); doc.line(14,y,196,y); y+=6;
-  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(...dk); doc.text('TOTAL:',138,y); doc.setTextColor(...g); doc.text(fmtM(f.total),160,y);
-  if(f.status==='pago'){doc.setFillColor(46,204,113);doc.rect(14,y-6,32,10,'F');doc.setTextColor(255,255,255);doc.setFontSize(8);doc.text('PAGO',17,y+1);}
+  doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...g);doc.text('CLIENTE',14,y);doc.text('EMISSÃO',100,y);doc.text('VENCIMENTO',145,y);y+=5;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...dk);
+  const cli=DB.clientes.find(c=>getId(c)===f.clienteId);
+  doc.text(cli?cli.nome:'—',14,y);doc.text(cli&&cli.tel?cli.tel:'',14,y+5);doc.text(fmtD(f.emissao),100,y);doc.text(fmtD(f.vencimento),145,y);
+  doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...g);doc.text('FORMA',100,y+10);doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...dk);doc.text(f.forma||'',100,y+15);y+=24;
+  doc.setFillColor(...g);doc.rect(14,y,182,7,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(250,247,242);doc.text('DESCRIÇÃO',16,y+5);doc.text('QTD',118,y+5);doc.text('UNIT.',136,y+5);doc.text('TOTAL',168,y+5);y+=10;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);
+  (itens||[]).forEach((item,idx)=>{if(idx%2===0){doc.setFillColor(...bg);doc.rect(14,y-4,182,7,'F');}doc.setTextColor(...gr);doc.text(String(item.desc||''),16,y+1,{maxWidth:98});doc.text(String(item.qty||1),120,y+1);doc.text(fmtM(item.price),136,y+1);doc.text(fmtM(item.total),168,y+1);y+=8;});
+  y+=4;doc.setDrawColor(...g);doc.setLineWidth(0.5);doc.line(14,y,196,y);y+=6;
+  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...dk);doc.text('TOTAL:',138,y);doc.setTextColor(...g);doc.text(fmtM(f.total),160,y);
+  if(f.status==='pago'){doc.setFillColor(46,125,50);doc.rect(14,y-6,32,10,'F');doc.setTextColor(255,255,255);doc.setFontSize(8);doc.text('PAGO',17,y+1);}
   if(f.status==='pendente'){y+=14;doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...g);doc.text('PAGAMENTO VIA PIX',14,y);y+=5;doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...gr);doc.text('Chave: 07209729496  ·  Favorecido: Haras ET',14,y);}
   if(f.obs){y+=12;doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...g);doc.text('REFERÊNCIA',14,y);y+=5;doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(...gr);doc.text(String(f.obs),14,y,{maxWidth:182});}
-  doc.setFillColor(...dk);doc.rect(0,272,210,25,'F');doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(...lg);doc.text('Haras ET · Criatório Mangalarga Marchador · @haras_et · Aldeia - PE',105,281,{align:'center'});doc.setTextColor(...g);doc.text('Obrigado pela confiança!',105,287,{align:'center'});
+  doc.setFillColor(...g);doc.rect(0,272,210,25,'F');doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(250,247,242);doc.text('Haras ET · Criatório Mangalarga Marchador · @haras_et · Aldeia - PE',105,281,{align:'center'});doc.setTextColor(250,247,242);doc.setFontSize(8);doc.text('Obrigado pela confiança!',105,287,{align:'center'});
   doc.save('Fatura_HarasET_'+f.num+'.pdf');
-  toast('PDF gerado!');
+  toast('PDF gerado!','success');
 }
 
-// ── INIT ──────────────────────────────────────────────────────
 goTo('dash');
 </script>
 </body>
