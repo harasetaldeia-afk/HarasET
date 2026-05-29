@@ -332,29 +332,40 @@ function api(acao, tabela, dados){
 
 // ── LOGIN ────────────────────────────────────────────────────
 function entrar(){
-  var raw = document.getElementById('login-input').value.trim();
-  if(!raw){ mostrarErro('Digite seu CPF ou telefone'); return; }
-  showLoading('Buscando cadastro...');
-  api('listar','Clientes').then(function(clientes){
-    var rawLimpo = limparDoc(raw);
-    // Normaliza: remove o 55 do inicio pra comparar sempre sem codigo do pais
-    function sem55(n){ return n.length > 11 && n.startsWith('55') ? n.slice(2) : n; }
-    console.log('Buscando:', rawLimpo, '| sem55:', sem55(rawLimpo), '| Total:', clientes.length);
-    var cliente = clientes.find(function(c){
-      var tel = sem55(limparDoc(String(c.tel||'')));
-      var doc = sem55(limparDoc(String(c.doc||'')));
-      var raw = sem55(rawLimpo);
-      return raw.length >= 8 && (tel === raw || doc === raw);
-    });
-    if(!cliente){
-      hideLoading(); mostrarErro('Código de acesso inválido.'); return;
-    }
-    clienteAtual = cliente;
-    return api('listar','Faturas').then(function(faturas){
-      faturasCliente = faturas.filter(function(f){ return String(f.clienteId)===String(cliente.id); });
+  // Se já tem token válido (veio da acesso.html), usa direto
+  var token = getToken();
+  var perfil = sessionStorage.getItem('het_perfil');
+  var nome   = sessionStorage.getItem('het_nome');
+  var cid    = sessionStorage.getItem('het_clienteId');
+
+  if(token && perfil === 'cliente' && cid){
+    clienteAtual = { _id: cid, id: cid, nome: nome||'Cliente' };
+    showLoading('Carregando faturas...');
+    apiFetch('GET', '/api/faturas').then(function(faturas){
+      faturasCliente = faturas;
       hideLoading(); abrirPortal();
-    });
-  }).catch(function(e){ hideLoading(); mostrarErro('Erro de conexão: '+e.message); console.error('ERRO PORTAL:', e); });
+    }).catch(function(e){ hideLoading(); mostrarErro('Erro: '+e.message); });
+    return;
+  }
+
+  // Login manual com código
+  var raw = document.getElementById('login-input').value.trim();
+  if(!raw){ mostrarErro('Digite seu código de acesso'); return; }
+  showLoading('Verificando...');
+  apiFetch('POST', '/api/auth/cliente', {codigo: raw})
+    .then(function(j){
+      sessionStorage.setItem('het_token',     j.token);
+      sessionStorage.setItem('het_perfil',    'cliente');
+      sessionStorage.setItem('het_clienteId', j.clienteId);
+      sessionStorage.setItem('het_nome',      j.nome);
+      clienteAtual = { _id: j.clienteId, id: j.clienteId, nome: j.nome };
+      return apiFetch('GET', '/api/faturas');
+    })
+    .then(function(faturas){
+      faturasCliente = faturas;
+      hideLoading(); abrirPortal();
+    })
+    .catch(function(e){ hideLoading(); mostrarErro('Código inválido'); });
 }
 
 function mostrarErro(msg){
@@ -365,9 +376,11 @@ function mostrarErro(msg){
 
 function sair(){
   clienteAtual=null; faturasCliente=[];
-  document.getElementById('portal').classList.remove('visible');
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('login-input').value='';
+  sessionStorage.removeItem('het_token');
+  sessionStorage.removeItem('het_perfil');
+  sessionStorage.removeItem('het_clienteId');
+  sessionStorage.removeItem('het_nome');
+  window.location.href = 'acesso.html#cliente';
 }
 
 // ── PORTAL ───────────────────────────────────────────────────

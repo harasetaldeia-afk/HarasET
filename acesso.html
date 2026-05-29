@@ -2,8 +2,16 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Haras ET · Acesso</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#c9a84c"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Haras ET"/>
+<link rel="apple-touch-icon" href="logo.jpg"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
 <style>
 :root{
@@ -154,7 +162,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 </div>
 
 <script>
-const ADMIN_SENHA = 'haraset2025';
+
 let perfilAtual = null;
 
 function selecionarPerfil(perfil){
@@ -177,32 +185,73 @@ function selecionarPerfil(perfil){
   setTimeout(()=>{ document.getElementById('form-'+perfil).scrollIntoView({behavior:'smooth',block:'nearest'}); }, 150);
 }
 
-function entrarAdmin(){
-  const s = document.getElementById('admin-senha').value;
-  const stored = localStorage.getItem('het_v3');
-  const cfg = stored ? JSON.parse(stored) : {};
-  const expected = cfg.senha || ADMIN_SENHA;
-  if(s === expected){
-    // Save login state
-    cfg.loggedIn = true;
-    localStorage.setItem('het_v3', JSON.stringify(cfg));
+const API_BASE = 'https://haraset-api.onrender.com';
+
+async function entrarAdmin(){
+  const senha = document.getElementById('admin-senha').value;
+  if(!senha){ showErr('admin-err','Digite a senha'); return; }
+  const btn = document.querySelector('#form-admin .btn-enter');
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  try{
+    const r = await fetch(API_BASE+'/api/auth/admin', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({senha})
+    });
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.erro);
+    sessionStorage.setItem('het_token', j.token);
+    sessionStorage.setItem('het_perfil', 'admin');
+    localStorage.setItem('het_token', j.token);
+    localStorage.setItem('het_perfil', 'admin');
     window.location.href = 'sistema.html';
-  } else {
-    showErr('admin-err');
+  }catch(e){
+    btn.textContent = 'Entrar'; btn.disabled = false;
+    showErr('admin-err', e.message||'Senha incorreta');
   }
 }
 
-function entrarCliente(){
-  const code = document.getElementById('cli-code').value.trim();
-  if(!code){ showErr('cli-err','Digite seu código'); return; }
-  // Pass code to portal via sessionStorage
-  sessionStorage.setItem('het_portal_code', code);
-  window.location.href = 'portal.html?auto=1';
+async function entrarCliente(){
+  const codigo = document.getElementById('cli-code').value.trim();
+  if(!codigo){ showErr('cli-err','Digite seu código'); return; }
+  const btn = document.querySelector('#form-cliente .btn-enter');
+  btn.textContent = 'Verificando...'; btn.disabled = true;
+  try{
+    const r = await fetch(API_BASE+'/api/auth/cliente', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({codigo})
+    });
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.erro);
+    sessionStorage.setItem('het_token', j.token);
+    sessionStorage.setItem('het_perfil', 'cliente');
+    sessionStorage.setItem('het_clienteId', j.clienteId);
+    sessionStorage.setItem('het_nome', j.nome);
+    window.location.href = 'portal.html';
+  }catch(e){
+    btn.textContent = 'Acessar Minhas Faturas'; btn.disabled = false;
+    showErr('cli-err', e.message||'Código inválido');
+  }
 }
 
-function entrarColab(){
-  // Coming soon
-  showErr('colab-err','Área em desenvolvimento. Em breve!');
+async function entrarColab(){
+  const senha = document.getElementById('colab-code').value.trim();
+  if(!senha){ showErr('colab-err','Digite o código'); return; }
+  const btn = document.querySelector('#form-colab .btn-enter');
+  btn.textContent = 'Verificando...'; btn.disabled = true;
+  try{
+    const r = await fetch(API_BASE+'/api/auth/colab', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({senha})
+    });
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.erro);
+    sessionStorage.setItem('het_token', j.token);
+    sessionStorage.setItem('het_perfil', 'colab');
+    window.location.href = 'colab.html';
+  }catch(e){
+    btn.textContent = 'Entrar'; btn.disabled = false;
+    showErr('colab-err','Área em desenvolvimento. Em breve!');
+  }
 }
 
 function showErr(id, msg=''){
@@ -226,6 +275,15 @@ const hash = window.location.hash;
 if(hash === '#admin')   selecionarPerfil('admin');
 if(hash === '#cliente') selecionarPerfil('cliente');
 if(hash === '#colab')   selecionarPerfil('colab');
+
+// ── PWA ──────────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js')
+      .then(function(r){ console.log('SW OK:', r.scope); })
+      .catch(function(e){ console.warn('SW erro:', e); });
+  });
+}
 </script>
 </body>
 </html>

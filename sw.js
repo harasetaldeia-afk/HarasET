@@ -1,35 +1,37 @@
-const CACHE = 'haraset-v1';
+const CACHE = 'haraset-v2';
 const ASSETS = [
+  '/HarasET/acesso.html',
   '/HarasET/portal.html',
+  '/HarasET/sistema.html',
+  '/HarasET/api.js',
   '/HarasET/logo.jpg',
   '/HarasET/manifest.json'
 ];
 
-// Install - cache assets
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then(c => c.addAll(ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
-// Activate - clean old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch - network first, fallback to cache
 self.addEventListener('fetch', e => {
-  // API calls always go to network
-  if(e.request.url.includes('script.google.com')) return;
+  // API calls sempre vão para a rede — nunca cacheia
+  if(e.request.url.includes('haraset-api.onrender.com')) return;
+  if(e.request.url.includes('fonts.googleapis.com')) return;
 
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        // Cache fresh copy
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, copy));
         return res;

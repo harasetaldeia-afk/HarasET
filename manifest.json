@@ -2,7 +2,7 @@
   "name": "Haras ET",
   "short_name": "Haras ET",
   "description": "Portal do Cliente - Haras ET",
-  "start_url": "/HarasET/portal.html",
+  "start_url": "/HarasET/acesso.html",
   "scope": "/HarasET/",
   "display": "standalone",
   "orientation": "portrait",
