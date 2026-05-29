@@ -626,8 +626,11 @@ async function seedClientesSheets(){
   for(const c of lista){
     try{
       var cLimpo = Object.assign({}, c, {doc:'',email:'',obs:''});
-      // Limpa telefone: remove +, espacos e tracoes pra nao dar #ERROR! no Sheets
-      if(cLimpo.tel) cLimpo.tel = cLimpo.tel.replace(/[^0-9]/g,'');
+      // Remove tudo que nao eh numero E remove o 55 do inicio
+      if(cLimpo.tel){
+        cLimpo.tel = cLimpo.tel.replace(/[^0-9]/g,'');
+        if(cLimpo.tel.length > 11 && cLimpo.tel.startsWith('55')) cLimpo.tel = cLimpo.tel.slice(2);
+      }
       await api('inserir','Clientes', cLimpo);
       ok++; status.textContent=ok+'/'+lista.length+'...';
     } catch(e){ console.warn(e); }
