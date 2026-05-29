@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Haras ET · Acesso</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --gold:#c9a84c;--gold-l:#e8c97e;--gold-d:#7a5c18;
+  --red-b:#c0392b;--bg:#0a0a0a;--bg2:#111;--card:#161616;--card2:#1e1e1e;
+  --border:rgba(201,168,76,0.15);--b2:rgba(255,255,255,0.06);
+  --txt:#f0ebe0;--txt2:#a89880;--txt3:#6b5f4e;
+  --green:#2ecc71;--blue:#3498db;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Lato',sans-serif;font-weight:300;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+
+/* BG */
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(139,26,26,0.12) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 80% 100%,rgba(201,168,76,0.06) 0%,transparent 60%);pointer-events:none}
+
+.wrap{width:100%;max-width:480px;position:relative;z-index:1}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:3rem}
+.header a{display:inline-block;margin-bottom:1.5rem}
+.header img{width:70px;height:70px;object-fit:cover;border-radius:50%;border:1px solid rgba(201,168,76,0.3)}
+.header h1{font-family:'Cinzel',serif;font-size:1.4rem;color:var(--gold);letter-spacing:.2em;margin-bottom:.3rem}
+.header p{font-size:.68rem;color:var(--txt3);letter-spacing:.3em}
+
+/* CARDS */
+.cards{display:flex;flex-direction:column;gap:2px;margin-bottom:2rem}
+.card{background:var(--card);border:1px solid var(--b2);padding:1.8rem 2rem;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;display:flex;align-items:center;gap:1.5rem}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);transform:scaleY(0);transition:transform .3s;transform-origin:bottom}
+.card:hover{border-color:rgba(201,168,76,0.3);background:#1a1a1a;transform:translateX(4px)}
+.card:hover::before{transform:scaleY(1)}
+.card.active{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.04)}
+.card.active::before{transform:scaleY(1)}
+.card-icon{font-size:2rem;flex-shrink:0;width:48px;text-align:center}
+.card-info{flex:1}
+.card-info h3{font-family:'Cinzel',serif;font-size:.88rem;letter-spacing:.15em;color:var(--txt);margin-bottom:.3rem}
+.card-info p{font-size:.75rem;color:var(--txt2);line-height:1.5}
+.card-arrow{color:var(--txt3);font-size:.9rem;flex-shrink:0;transition:transform .3s}
+.card:hover .card-arrow{transform:translateX(4px);color:var(--gold)}
+
+/* LOGIN FORM */
+.login-form{background:var(--bg2);border:1px solid var(--border);padding:2rem;display:none;animation:fadeIn .3s ease}
+.login-form.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.login-form h3{font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1.2rem}
+.fg{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.fg label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.2em;color:var(--txt3);text-transform:uppercase}
+.fg input{background:var(--card2);border:1px solid var(--b2);color:var(--txt);padding:.8rem 1rem;font-family:'Lato',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;width:100%}
+.fg input:focus{border-color:var(--gold)}
+.btn-enter{width:100%;background:var(--gold);color:var(--bg);font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.25em;padding:.95rem;border:none;cursor:pointer;font-weight:700;transition:all .2s;margin-top:.5rem}
+.btn-enter:hover{background:var(--gold-l)}
+.login-err{color:var(--red-b);font-size:.72rem;margin-top:.6rem;display:none;font-family:'Cinzel',serif;letter-spacing:.1em;text-align:center}
+
+/* BACK */
+.back{text-align:center}
+.back a{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.25em;color:var(--txt3);text-decoration:none;transition:color .2s}
+.back a:hover{color:var(--gold)}
+
+/* COMING SOON */
+.coming{background:rgba(52,152,219,0.06);border:1px solid rgba(52,152,219,0.15);padding:1rem 1.5rem;text-align:center;margin-top:2px}
+.coming p{font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.2em;color:var(--blue)}
+
+@media(max-width:480px){
+  body{padding:1.5rem 1rem}
+  .card{padding:1.4rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="header">
+    <a href="index.html"><img src="logo.jpg" alt="Haras ET"/></a>
+    <h1>Haras ET</h1>
+    <p>Selecione seu perfil de acesso</p>
+  </div>
+
+  <div class="cards">
+    <!-- ADMINISTRAÇÃO -->
+    <div class="card" id="card-admin" onclick="selecionarPerfil('admin')">
+      <div class="card-icon">👑</div>
+      <div class="card-info">
+        <h3>Administração</h3>
+        <p>Gestão de clientes, animais, faturas e pagamentos</p>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+
+    <!-- CLIENTE -->
+    <div class="card" id="card-cliente" onclick="selecionarPerfil('cliente')">
+      <div class="card-icon">👤</div>
+      <div class="card-info">
+        <h3>Cliente</h3>
+        <p>Visualize suas faturas e realize pagamentos via PIX</p>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+
+    <!-- COLABORADOR -->
+    <div class="card" id="card-colab" onclick="selecionarPerfil('colab')">
+      <div class="card-icon">🤝</div>
+      <div class="card-info">
+        <h3>Colaborador</h3>
+        <p>Ficha dos animais, tratos e observações</p>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- FORM ADMIN -->
+  <div class="login-form" id="form-admin">
+    <h3>👑 Administração</h3>
+    <div class="fg">
+      <label>Senha de Acesso</label>
+      <input type="password" id="admin-senha" placeholder="••••••••" onkeydown="if(event.key==='Enter')entrarAdmin()"/>
+    </div>
+    <button class="btn-enter" onclick="entrarAdmin()">Entrar</button>
+    <div class="login-err" id="admin-err">Senha incorreta.</div>
+  </div>
+
+  <!-- FORM CLIENTE -->
+  <div class="login-form" id="form-cliente">
+    <h3>👤 Cliente</h3>
+    <div class="fg">
+      <label>Código de Acesso</label>
+      <input type="text" id="cli-code" placeholder="Digite seu código" onkeydown="if(event.key==='Enter')entrarCliente()"/>
+    </div>
+    <button class="btn-enter" onclick="entrarCliente()">Acessar Minhas Faturas</button>
+    <div class="login-err" id="cli-err">Código inválido.</div>
+  </div>
+
+  <!-- FORM COLABORADOR -->
+  <div class="login-form" id="form-colab">
+    <h3>🤝 Colaborador</h3>
+    <div class="fg">
+      <label>Código de Acesso</label>
+      <input type="text" id="colab-code" placeholder="Digite seu código" onkeydown="if(event.key==='Enter')entrarColab()"/>
+    </div>
+    <button class="btn-enter" onclick="entrarColab()">Entrar</button>
+    <div class="login-err" id="colab-err">Código inválido.</div>
+    <div class="coming" style="margin-top:1rem">
+      <p>EM BREVE · Área do colaborador em desenvolvimento</p>
+    </div>
+  </div>
+
+  <div class="back" style="margin-top:2rem">
+    <a href="index.html">← Voltar ao site</a>
+  </div>
+</div>
+
+<script>
+const ADMIN_SENHA = 'haraset2025';
+let perfilAtual = null;
+
+function selecionarPerfil(perfil){
+  // Reset cards
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.login-form').forEach(f=>f.classList.remove('show'));
+
+  // Activate selected
+  document.getElementById('card-'+perfil).classList.add('active');
+  document.getElementById('form-'+perfil).classList.add('show');
+  perfilAtual = perfil;
+
+  // Focus input
+  setTimeout(()=>{
+    const inputs = document.getElementById('form-'+perfil).querySelectorAll('input');
+    if(inputs.length) inputs[0].focus();
+  }, 100);
+
+  // Scroll to form
+  setTimeout(()=>{ document.getElementById('form-'+perfil).scrollIntoView({behavior:'smooth',block:'nearest'}); }, 150);
+}
+
+function entrarAdmin(){
+  const s = document.getElementById('admin-senha').value;
+  const stored = localStorage.getItem('het_v3');
+  const cfg = stored ? JSON.parse(stored) : {};
+  const expected = cfg.senha || ADMIN_SENHA;
+  if(s === expected){
+    // Save login state
+    cfg.loggedIn = true;
+    localStorage.setItem('het_v3', JSON.stringify(cfg));
+    window.location.href = 'sistema.html';
+  } else {
+    showErr('admin-err');
+  }
+}
+
+function entrarCliente(){
+  const code = document.getElementById('cli-code').value.trim();
+  if(!code){ showErr('cli-err','Digite seu código'); return; }
+  // Pass code to portal via sessionStorage
+  sessionStorage.setItem('het_portal_code', code);
+  window.location.href = 'portal.html?auto=1';
+}
+
+function entrarColab(){
+  // Coming soon
+  showErr('colab-err','Área em desenvolvimento. Em breve!');
+}
+
+function showErr(id, msg=''){
+  const el = document.getElementById(id);
+  if(msg) el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(()=>el.style.display='none', 3000);
+  // Shake
+  el.parentElement.style.animation = 'none';
+  el.parentElement.offsetHeight;
+  el.parentElement.style.animation = 'shake .3s ease';
+}
+
+// Add shake animation
+const style = document.createElement('style');
+style.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}';
+document.head.appendChild(style);
+
+// Auto-select if coming from a specific link
+const hash = window.location.hash;
+if(hash === '#admin')   selecionarPerfil('admin');
+if(hash === '#cliente') selecionarPerfil('cliente');
+if(hash === '#colab')   selecionarPerfil('colab');
+</script>
+</body>
+</html>
