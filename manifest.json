@@ -1,0 +1,25 @@
+{
+  "name": "Haras ET",
+  "short_name": "Haras ET",
+  "description": "Portal do Cliente - Haras ET",
+  "start_url": "/HarasET/portal.html",
+  "scope": "/HarasET/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#c9a84c",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

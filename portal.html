@@ -2,8 +2,17 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Haras ET · Portal do Cliente</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#c9a84c"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Haras ET"/>
+<link rel="apple-touch-icon" href="logo.jpg"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -131,9 +140,44 @@ body{background:var(--bg);color:var(--txt);font-family:'Lato',sans-serif;font-we
   .resumo-grid .resumo-card:last-child{grid-column:span 2}
   .portal-content{padding:1.2rem 1rem}
 }
+
+/* iOS safe area */
+body { padding-top: env(safe-area-inset-top); }
+#login-screen { padding-top: calc(1.5rem + env(safe-area-inset-top)); }
+
+/* Install banner */
+#install-banner {
+  display:none;
+  position:fixed;
+  bottom:1.5rem;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--bg2);
+  border:1px solid var(--border);
+  padding:1rem 1.5rem;
+  z-index:998;
+  width:calc(100% - 2rem);
+  max-width:400px;
+  flex-direction:column;
+  gap:.8rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.6);
+}
+#install-banner.show { display:flex; }
+#install-banner p { font-size:.82rem; color:var(--txt2); line-height:1.6; }
+#install-banner p strong { color:var(--txt); }
+#install-banner .ib-btns { display:flex; gap:.8rem; }
 </style>
 </head>
 <body>
+
+<!-- Install Banner -->
+<div id="install-banner">
+  <p>📱 <strong>Instalar Haras ET</strong><br>Adicione o app na sua tela inicial para acesso rápido às suas faturas.</p>
+  <div class="ib-btns">
+    <button class="btn btn-primary btn-sm" onclick="instalarApp()" style="flex:1">Instalar App</button>
+    <button class="btn btn-ghost btn-sm" onclick="fecharBanner()">Agora não</button>
+  </div>
+</div>
 
 <!-- LOGIN -->
 <div id="login-screen">
@@ -465,6 +509,62 @@ function gerarPDF(faturaId, idx){
   doc.save('Fatura_HarasET_'+f.num+'.pdf');
   toast('PDF gerado!');
 }
+
+// ── PWA ──────────────────────────────────────────────────────
+let deferredPrompt = null;
+
+// Register service worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(r => console.log('SW registrado:', r.scope))
+      .catch(e => console.warn('SW erro:', e));
+  });
+}
+
+// Capture install prompt (Android)
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show banner after 3s
+  setTimeout(() => {
+    if(!localStorage.getItem('pwa-dismissed')){
+      document.getElementById('install-banner').classList.add('show');
+    }
+  }, 3000);
+});
+
+function instalarApp(){
+  fecharBanner();
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(r => {
+      if(r.outcome === 'accepted') toast('App instalado!');
+      deferredPrompt = null;
+    });
+  } else {
+    // iOS instructions
+    showIOSInstructions();
+  }
+}
+
+function fecharBanner(){
+  document.getElementById('install-banner').classList.remove('show');
+  localStorage.setItem('pwa-dismissed','1');
+}
+
+function showIOSInstructions(){
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isIOS){
+    alert('Para instalar no iPhone:\n\n1. Toque no ícone de compartilhar (□↑) na barra do Safari\n2. Role pra baixo e toque em "Adicionar à Tela de Início"\n3. Toque em "Adicionar"');
+  }
+}
+
+// Detect if already installed
+window.addEventListener('appinstalled', () => {
+  toast('App instalado com sucesso! 🎉');
+  deferredPrompt = null;
+});
 </script>
 </body>
 </html>
