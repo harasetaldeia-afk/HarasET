@@ -27,23 +27,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--txt);font-family:'Lato',sans-serif;font-weight:300;min-height:100vh}
 
-/* ── LOGIN ── */
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:var(--bg)}
-.login-wrap{width:100%;max-width:400px}
-.login-logo-wrap{text-align:center;margin-bottom:2.5rem}
-.login-logo-wrap img{width:90px;height:90px;object-fit:cover;border-radius:50%;border:2px solid rgba(201,168,76,0.4);box-shadow:0 0 40px rgba(201,168,76,0.15)}
-.login-logo-wrap h1{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold);letter-spacing:.2em;margin-top:1rem}
-.login-logo-wrap p{font-size:.65rem;color:var(--txt3);letter-spacing:.3em;margin-top:.3rem}
-.login-box{background:var(--bg2);border:1px solid var(--border);padding:2.5rem}
-.login-box .form-group{margin-bottom:1.2rem}
-.login-box label{font-family:'Cinzel',serif;font-size:.58rem;letter-spacing:.25em;color:var(--txt3);display:block;margin-bottom:.5rem;text-transform:uppercase}
-.login-box input{width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--txt);padding:.9rem 1rem;font-family:'Lato',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s}
-.login-box input:focus{border-color:var(--gold)}
-.login-btn{width:100%;background:var(--gold);color:var(--bg);font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.25em;padding:1rem;border:none;cursor:pointer;transition:all .2s;margin-top:.5rem;font-weight:700}
-.login-btn:hover{background:var(--gold-l)}
-.login-error{color:var(--red-b);font-size:.75rem;margin-top:.8rem;text-align:center;font-family:'Cinzel',serif;letter-spacing:.1em;display:none}
-.login-hint{font-size:.72rem;color:var(--txt3);text-align:center;margin-top:1.2rem;line-height:1.6}
-
 /* ── PORTAL ── */
 #portal{display:none;min-height:100vh}
 #portal.visible{display:block}
@@ -225,43 +208,8 @@ body { padding-top: env(safe-area-inset-top); }
   </div>
 </div>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-wrap">
-    <div class="login-logo-wrap">
-      <img src="logo.jpg" alt="Haras ET"/>
-      <h1>Haras ET</h1>
-      <p>Portal do Cliente</p>
-    </div>
-    <div class="login-box">
-      <div class="form-group">
-        <label>Código de Acesso</label>
-        <input type="text" id="login-input" placeholder="Digite seu código de acesso" onkeydown="if(event.key==='Enter')entrar()"/>
-      </div>
-      <button class="login-btn" onclick="entrar()">Acessar Minhas Faturas</button>
-      <div class="login-error" id="login-error">Código de acesso inválido.</div>
-      <p class="login-hint">Código fornecido pelo Haras ET</p>
-    </div>
-
-    <!-- App install buttons -->
-    <div class="app-btns">
-      <p class="app-btns-title">Instalar como App</p>
-      <div class="app-btns-row">
-        <button class="app-btn android" onclick="instalarAndroid()" id="btn-android">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341a.75.75 0 01-.75.75H7.227a.75.75 0 01-.75-.75V9.5h11.046v5.841zM7.5 7.25a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM6 3.5L4.5 1.25M18 3.5l1.5-2.25M8.25 1.25h7.5"/><path d="M3 9.5C3 7.015 5.015 5 7.5 5h9C18.985 5 21 7.015 21 9.5v6c0 2.485-2.015 4.5-4.5 4.5h-9C5.015 20 3 17.985 3 15.5v-6z"/></svg>
-          <span>Android</span>
-        </button>
-        <button class="app-btn ios" onclick="instalarIOS()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-          <span>iPhone / iPad</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- PORTAL -->
-<div id="portal">
+<div id="portal" class="visible">
   <header class="portal-header">
     <div class="portal-header-left">
       <img src="logo.jpg" alt="Haras ET"/>
@@ -330,57 +278,31 @@ function api(acao, tabela, dados){
   });
 }
 
-// ── LOGIN ────────────────────────────────────────────────────
-function entrar(){
-  // Se já tem token válido (veio da acesso.html), usa direto
-  var token = getToken();
-  var perfil = sessionStorage.getItem('het_perfil');
-  var nome   = sessionStorage.getItem('het_nome');
-  var cid    = sessionStorage.getItem('het_clienteId');
-
-  if(token && perfil === 'cliente' && cid){
-    clienteAtual = { _id: cid, id: cid, nome: nome||'Cliente' };
-    showLoading('Carregando faturas...');
-    apiFetch('GET', '/api/faturas').then(function(faturas){
-      faturasCliente = faturas;
-      hideLoading(); abrirPortal();
-    }).catch(function(e){ hideLoading(); mostrarErro('Erro: '+e.message); });
-    return;
-  }
-
-  // Login manual com código
-  var raw = document.getElementById('login-input').value.trim();
-  if(!raw){ mostrarErro('Digite seu código de acesso'); return; }
-  showLoading('Verificando...');
-  apiFetch('POST', '/api/auth/cliente', {codigo: raw})
-    .then(function(j){
-      sessionStorage.setItem('het_token',     j.token);
-      sessionStorage.setItem('het_perfil',    'cliente');
-      sessionStorage.setItem('het_clienteId', j.clienteId);
-      sessionStorage.setItem('het_nome',      j.nome);
-      clienteAtual = { _id: j.clienteId, id: j.clienteId, nome: j.nome };
-      return apiFetch('GET', '/api/faturas');
-    })
+// ── CARREGAR PORTAL ──────────────────────────────────────────
+function carregarPortal(){
+  var cid  = sessionStorage.getItem('het_clienteId');
+  var nome = sessionStorage.getItem('het_nome');
+  clienteAtual = { _id: cid, id: cid, nome: nome||'Cliente' };
+  showLoading('Carregando faturas...');
+  apiFetch('GET', '/api/faturas')
     .then(function(faturas){
       faturasCliente = faturas;
-      hideLoading(); abrirPortal();
+      hideLoading();
+      abrirPortal();
     })
-    .catch(function(e){ hideLoading(); mostrarErro('Código inválido'); });
+    .catch(function(e){
+      hideLoading();
+      // Token expirou — volta pro login
+      window.location.href = 'acesso.html#cliente';
+    });
 }
 
-function mostrarErro(msg){
-  var el=document.getElementById('login-error');
-  el.textContent=msg; el.style.display='block';
-  setTimeout(function(){ el.style.display='none'; }, 3000);
-}
+
 
 function sair(){
-  clienteAtual=null; faturasCliente=[];
-  sessionStorage.removeItem('het_token');
-  sessionStorage.removeItem('het_perfil');
-  sessionStorage.removeItem('het_clienteId');
-  sessionStorage.removeItem('het_nome');
-  window.location.href = 'acesso.html#cliente';
+  clienteAtual = null; faturasCliente = [];
+  sessionStorage.clear();
+  window.location.href = 'acesso.html';
 }
 
 // ── PORTAL ───────────────────────────────────────────────────
