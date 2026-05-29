@@ -232,7 +232,7 @@ function entrar(){
   showLoading('Buscando cadastro...');
   api('listar','Clientes').then(function(clientes){
     var rawLimpo = limparDoc(raw);
-    console.log('Buscando:', rawLimpo, 'Total clientes:', clientes.length);
+    console.log('Buscando:', rawLimpo, 'Total clientes:', clientes ? clientes.length : 'NULL', JSON.stringify(clientes).slice(0,200));
     var cliente = clientes.find(function(c){
       var telLimpo = limparDoc(String(c.tel||''));
       var docLimpo = limparDoc(String(c.doc||''));
@@ -256,7 +256,7 @@ function entrar(){
       faturasCliente = faturas.filter(function(f){ return String(f.clienteId)===String(cliente.id); });
       hideLoading(); abrirPortal();
     });
-  }).catch(function(e){ hideLoading(); mostrarErro('Erro de conexão. Tente novamente.'); console.error(e); });
+  }).catch(function(e){ hideLoading(); mostrarErro('Erro de conexão: '+e.message); console.error('ERRO PORTAL:', e); });
 }
 
 function mostrarErro(msg){
