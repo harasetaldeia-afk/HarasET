@@ -6,6 +6,7 @@
 <title>Haras ET · Sistema</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
   --gold:#c9a84c;--gold-l:#e8c97e;--gold-d:#7a5c18;
@@ -125,6 +126,7 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--txt)}
 @keyframes spin{to{transform:rotate(360deg)}}
 .mtog{display:none;position:fixed;top:1rem;left:1rem;z-index:100;background:var(--card);border:1px solid var(--border);padding:.6rem;cursor:pointer;font-size:1.2rem;color:var(--txt)}
 @media(max-width:768px){
+  #dash-charts-wrap{grid-template-columns:1fr!important}
   .sb{transform:translateX(-100%)}.sb.open{transform:translateX(0)}
   .main{margin-left:0;padding:1rem}.mtog{display:block}
   .ph{margin-top:3.5rem}.fgrid{grid-template-columns:1fr}
@@ -168,10 +170,37 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--txt)}
 
     <!-- DASHBOARD -->
     <div class="page active" id="page-dash">
-      <div class="ph"><h2>Dashboard</h2><p>Visão geral financeira</p></div>
+      <div class="ph">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem">
+          <div><h2>Dashboard</h2><p>Visão por competência</p></div>
+          <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+            <select id="dash-mes" class="sbar" style="width:130px" onchange="renderDash()">
+              <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+              <option value="3">Março</option><option value="4">Abril</option>
+              <option value="5">Maio</option><option value="6">Junho</option>
+              <option value="7">Julho</option><option value="8">Agosto</option>
+              <option value="9">Setembro</option><option value="10">Outubro</option>
+              <option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+            <select id="dash-ano" class="sbar" style="width:90px" onchange="renderDash()"></select>
+            <button class="btn btn-ghost btn-sm" onclick="dashAnual()">Ver Ano</button>
+          </div>
+        </div>
+      </div>
+      <div id="dash-comp-label" style="font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.25em;color:var(--gold-d);margin-bottom:1.5rem"></div>
       <div class="dg" id="dash-cards"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-bottom:1.5rem" id="dash-charts-wrap">
+        <div style="background:var(--card);border:1px solid var(--b2);padding:1.5rem">
+          <div style="font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1rem">RECEITA POR CATEGORIA</div>
+          <canvas id="chart-cat" height="200"></canvas>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--b2);padding:1.5rem">
+          <div style="font-family:Cinzel,serif;font-size:.68rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1rem">RECEBIDO VS PENDENTE</div>
+          <canvas id="chart-status" height="200"></canvas>
+        </div>
+      </div>
       <div class="tw">
-        <div class="tw-head"><h3>Últimas Faturas</h3><button class="btn btn-outline btn-sm" onclick="goTo('faturas')">Ver todas</button></div>
+        <div class="tw-head"><h3 id="dash-fat-title">Faturas do Mês</h3><button class="btn btn-outline btn-sm" onclick="goTo('faturas')">Ver todas</button></div>
         <div id="dash-rec"></div>
       </div>
     </div>
@@ -536,29 +565,204 @@ async function goTo(page){
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
+let chartCat = null, chartStatus = null;
+
+function initDashSelects(){
+  const now = new Date();
+  const anoSel = document.getElementById('dash-ano');
+  if(anoSel && anoSel.options.length === 0){
+    for(let a = now.getFullYear()-2; a <= now.getFullYear()+1; a++){
+      const o = document.createElement('option');
+      o.value = a; o.textContent = a;
+      if(a === now.getFullYear()) o.selected = true;
+      anoSel.appendChild(o);
+    }
+  }
+  const mesSel = document.getElementById('dash-mes');
+  if(mesSel) mesSel.value = now.getMonth()+1;
+}
+
 async function renderDash(){
+  initDashSelects();
   loading('Carregando...');
   try{
     await Promise.all([loadIfNeeded('Clientes'), loadIfNeeded('Faturas'), loadIfNeeded('Categorias'), loadIfNeeded('Animais')]);
     hideLoad();
-    const fa=DB.faturas;
-    const total=fa.reduce((s,f)=>s+parseFloat(f.total||0),0);
-    const pago=fa.filter(f=>f.status==='pago').reduce((s,f)=>s+parseFloat(f.total||0),0);
-    const pend=fa.filter(f=>f.status==='pendente').reduce((s,f)=>s+parseFloat(f.total||0),0);
-    document.getElementById('dash-cards').innerHTML=`
-      <div class="dc"><div class="lbl">Faturado</div><div class="val">${fmtM(total)}</div><div class="sub">${fa.length} faturas</div></div>
-      <div class="dc"><div class="lbl">Recebido</div><div class="val" style="color:var(--green)">${fmtM(pago)}</div><div class="sub">${fa.filter(f=>f.status==='pago').length} pagas</div></div>
-      <div class="dc"><div class="lbl">Pendente</div><div class="val" style="color:var(--orange)">${fmtM(pend)}</div><div class="sub">${fa.filter(f=>f.status==='pendente').length} pendentes</div></div>
-      <div class="dc"><div class="lbl">Clientes</div><div class="val" style="color:var(--blue)">${DB.clientes.length}</div><div class="sub">${DB.animais.length} animais</div></div>`;
-    const rec=fa.slice().sort((a,b)=>parseInt(b.num)-parseInt(a.num)).slice(0,6);
-    document.getElementById('dash-rec').innerHTML = rec.length ? rec.map(f=>{
-      const c=DB.clientes.find(x=>x.id===f.clienteId);
-      return `<div style="background:var(--card);border:1px solid var(--b2);padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1px">
-        <div><div style="font-size:.85rem;color:var(--txt)">${c?c.nome:'—'}</div><div style="font-size:.72rem;color:var(--txt2)">#${String(f.num).padStart(4,'0')} · <span class="badge badge-${f.status}">${f.status}</span></div></div>
-        <div style="text-align:right"><div style="font-family:Cinzel,serif;color:var(--gold)">${fmtM(f.total)}</div><div style="font-size:.7rem;color:var(--txt3)">${fmtD(f.vencimento)}</div></div>
+  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
+
+  const mes = parseInt(document.getElementById('dash-mes')?.value || new Date().getMonth()+1);
+  const ano = parseInt(document.getElementById('dash-ano')?.value || new Date().getFullYear());
+  const mesNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesNomeFull = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  // Filter faturas by vencimento month/year
+  const fa = DB.faturas.filter(f=>{
+    if(!f.vencimento) return false;
+    const [y,m] = f.vencimento.split('-');
+    return parseInt(y)===ano && parseInt(m)===mes;
+  });
+
+  const label = `Competência: ${mesNomeFull[mes-1]} / ${ano}`;
+  document.getElementById('dash-comp-label').textContent = label;
+  document.getElementById('dash-fat-title').textContent = `Faturas — ${mesNomeFull[mes-1]}/${ano}`;
+
+  const total = fa.reduce((s,f)=>s+parseFloat(f.total||0),0);
+  const pago  = fa.filter(f=>f.status==='pago').reduce((s,f)=>s+parseFloat(f.total||0),0);
+  const pend  = fa.filter(f=>f.status==='pendente').reduce((s,f)=>s+parseFloat(f.total||0),0);
+  const taxa  = total > 0 ? Math.round(pago/total*100) : 0;
+
+  document.getElementById('dash-cards').innerHTML=`
+    <div class="dc"><div class="lbl">Faturado</div><div class="val">${fmtM(total)}</div><div class="sub">${fa.length} faturas</div></div>
+    <div class="dc"><div class="lbl">Recebido</div><div class="val" style="color:var(--green)">${fmtM(pago)}</div><div class="sub">${fa.filter(f=>f.status==='pago').length} pagas</div></div>
+    <div class="dc"><div class="lbl">Pendente</div><div class="val" style="color:var(--orange)">${fmtM(pend)}</div><div class="sub">${fa.filter(f=>f.status==='pendente').length} pendentes</div></div>
+    <div class="dc"><div class="lbl">Taxa Recebimento</div><div class="val" style="color:${taxa>=80?'var(--green)':taxa>=50?'var(--orange)':'var(--red-b)'}">${taxa}%</div><div class="sub">${DB.clientes.length} clientes · ${DB.animais.length} animais</div></div>`;
+
+  // ── GRÁFICO 1: Receita por Categoria ──
+  const catData = {};
+  for(const f of fa){
+    // Load items for this fatura from cache or quick calc from animais
+    // Use animais de cada cliente como proxy
+    const anims = getAnimaisCliente(f.clienteId).filter(a=>a.categoria);
+    if(anims.length){
+      anims.forEach(a=>{
+        const p = getCatPreco(a.categoria);
+        catData[a.categoria] = (catData[a.categoria]||0) + p;
+      });
+    } else {
+      catData['Outros'] = (catData['Outros']||0) + parseFloat(f.total||0);
+    }
+  }
+  const catLabels = Object.keys(catData);
+  const catVals   = catLabels.map(k=>catData[k]);
+  const catColors = ['rgba(201,168,76,0.8)','rgba(52,152,219,0.8)','rgba(46,204,113,0.8)','rgba(230,126,34,0.8)','rgba(192,57,43,0.8)'];
+
+  if(chartCat) chartCat.destroy();
+  const ctx1 = document.getElementById('chart-cat')?.getContext('2d');
+  if(ctx1){
+    chartCat = new Chart(ctx1,{
+      type:'doughnut',
+      data:{ labels:catLabels, datasets:[{ data:catVals, backgroundColor:catColors, borderColor:'#161616', borderWidth:3 }] },
+      options:{
+        responsive:true, maintainAspectRatio:true,
+        plugins:{
+          legend:{ position:'bottom', labels:{ color:'#a89880', font:{family:'Lato',size:11}, padding:12 } },
+          tooltip:{ callbacks:{ label: ctx => ctx.label+': '+fmtM(ctx.raw) } }
+        }
+      }
+    });
+  }
+
+  // ── GRÁFICO 2: Recebido vs Pendente por mês (últimos 6 meses) ──
+  const meses6 = [];
+  for(let i=5; i>=0; i--){
+    const d = new Date(ano, mes-1-i, 1);
+    meses6.push({ label: mesNomes[d.getMonth()]+'/'+String(d.getFullYear()).slice(2), year: d.getFullYear(), month: d.getMonth()+1 });
+  }
+  const pagoArr = meses6.map(m=> DB.faturas.filter(f=>{ if(!f.vencimento)return false; const[y,mo]=f.vencimento.split('-'); return parseInt(y)===m.year&&parseInt(mo)===m.month&&f.status==='pago'; }).reduce((s,f)=>s+parseFloat(f.total||0),0));
+  const pendArr = meses6.map(m=> DB.faturas.filter(f=>{ if(!f.vencimento)return false; const[y,mo]=f.vencimento.split('-'); return parseInt(y)===m.year&&parseInt(mo)===m.month&&f.status==='pendente'; }).reduce((s,f)=>s+parseFloat(f.total||0),0));
+
+  if(chartStatus) chartStatus.destroy();
+  const ctx2 = document.getElementById('chart-status')?.getContext('2d');
+  if(ctx2){
+    chartStatus = new Chart(ctx2,{
+      type:'bar',
+      data:{
+        labels: meses6.map(m=>m.label),
+        datasets:[
+          { label:'Recebido', data:pagoArr, backgroundColor:'rgba(46,204,113,0.7)', borderColor:'rgba(46,204,113,1)', borderWidth:1, borderRadius:3 },
+          { label:'Pendente', data:pendArr, backgroundColor:'rgba(230,126,34,0.5)', borderColor:'rgba(230,126,34,0.9)', borderWidth:1, borderRadius:3 }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:true,
+        plugins:{
+          legend:{ labels:{ color:'#a89880', font:{family:'Lato',size:11} } },
+          tooltip:{ callbacks:{ label: ctx => ctx.dataset.label+': '+fmtM(ctx.raw) } }
+        },
+        scales:{
+          x:{ ticks:{ color:'#6b5f4e', font:{size:10} }, grid:{ color:'rgba(255,255,255,0.04)' } },
+          y:{ ticks:{ color:'#6b5f4e', font:{size:10}, callback: v=>'R$'+v.toLocaleString('pt-BR') }, grid:{ color:'rgba(255,255,255,0.04)' }, border:{ color:'transparent' } }
+        }
+      }
+    });
+  }
+
+  // ── FATURAS DO MÊS ──
+  const sorted = fa.slice().sort((a,b)=>parseInt(b.num)-parseInt(a.num));
+  document.getElementById('dash-rec').innerHTML = sorted.length ? sorted.map(f=>{
+    const c = DB.clientes.find(x=>x.id===f.clienteId);
+    return `<div style="background:var(--card);border:1px solid var(--b2);padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1px;gap:1rem">
+      <div style="flex:1"><div style="font-size:.85rem;color:var(--txt)">${c?c.nome:'—'}</div><div style="font-size:.72rem;color:var(--txt2)">#${String(f.num).padStart(4,'0')} · <span class="badge badge-${f.status}">${f.status}</span></div></div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:Cinzel,serif;color:var(--gold)">${fmtM(f.total)}</div>
+        <div style="font-size:.7rem;color:var(--txt3)">${fmtD(f.vencimento)}</div>
+        ${f.status==='pendente'?`<button class="btn btn-green btn-sm" style="margin-top:.3rem" onclick="abrirPag('${f.id}')">✓ Receber</button>`:''}
+      </div>
+    </div>`;
+  }).join('') : '<div class="empty"><div class="ei">📄</div><p>Nenhuma fatura para este mês</p></div>';
+}
+
+async function dashAnual(){
+  // Switch to full year view — show all months
+  const ano = parseInt(document.getElementById('dash-ano')?.value || new Date().getFullYear());
+  loading('Carregando ano...');
+  try{
+    await Promise.all([loadIfNeeded('Faturas'), loadIfNeeded('Clientes')]);
+    hideLoad();
+  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); return; }
+
+  const mesNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const meses12  = Array.from({length:12},(_,i)=>i+1);
+  const pagoArr  = meses12.map(m=> DB.faturas.filter(f=>{ if(!f.vencimento)return false; const[y,mo]=f.vencimento.split('-'); return parseInt(y)===ano&&parseInt(mo)===m&&f.status==='pago'; }).reduce((s,f)=>s+parseFloat(f.total||0),0));
+  const pendArr  = meses12.map(m=> DB.faturas.filter(f=>{ if(!f.vencimento)return false; const[y,mo]=f.vencimento.split('-'); return parseInt(y)===ano&&parseInt(mo)===m&&f.status==='pendente'; }).reduce((s,f)=>s+parseFloat(f.total||0),0));
+  const totalAno = [...pagoArr,...pendArr].reduce((s,v)=>s+v,0);
+  const pagoAno  = pagoArr.reduce((s,v)=>s+v,0);
+
+  document.getElementById('dash-comp-label').textContent = `Ano completo: ${ano} — Total faturado: ${fmtM(totalAno)} · Recebido: ${fmtM(pagoAno)}`;
+  document.getElementById('dash-fat-title').textContent = `Resumo Anual ${ano}`;
+  document.getElementById('dash-cards').innerHTML=`
+    <div class="dc"><div class="lbl">Total ${ano}</div><div class="val">${fmtM(totalAno)}</div><div class="sub">ano completo</div></div>
+    <div class="dc"><div class="lbl">Recebido</div><div class="val" style="color:var(--green)">${fmtM(pagoAno)}</div></div>
+    <div class="dc"><div class="lbl">Pendente</div><div class="val" style="color:var(--orange)">${fmtM(pendArr.reduce((s,v)=>s+v,0))}</div></div>
+    <div class="dc"><div class="lbl">Taxa</div><div class="val" style="color:var(--gold)">${totalAno>0?Math.round(pagoAno/totalAno*100):0}%</div></div>`;
+
+  if(chartCat) chartCat.destroy();
+  if(chartStatus) chartStatus.destroy();
+  const ctx2 = document.getElementById('chart-status')?.getContext('2d');
+  if(ctx2){
+    chartStatus = new Chart(ctx2,{
+      type:'bar',
+      data:{
+        labels: mesNomes,
+        datasets:[
+          { label:'Recebido', data:pagoArr, backgroundColor:'rgba(46,204,113,0.7)', borderColor:'rgba(46,204,113,1)', borderWidth:1, borderRadius:3 },
+          { label:'Pendente', data:pendArr, backgroundColor:'rgba(230,126,34,0.5)', borderColor:'rgba(230,126,34,0.9)', borderWidth:1, borderRadius:3 }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:true,
+        plugins:{
+          legend:{ labels:{ color:'#a89880', font:{family:'Lato',size:11} } },
+          tooltip:{ callbacks:{ label: ctx => ctx.dataset.label+': '+fmtM(ctx.raw) } }
+        },
+        scales:{
+          x:{ ticks:{ color:'#6b5f4e' }, grid:{ color:'rgba(255,255,255,0.04)' } },
+          y:{ ticks:{ color:'#6b5f4e', callback: v=>'R$'+v.toLocaleString('pt-BR') }, grid:{ color:'rgba(255,255,255,0.04)' }, border:{ color:'transparent' } }
+        }
+      }
+    });
+  }
+  // month grid
+  document.getElementById('dash-rec').innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px">
+    ${meses12.map(m=>{
+      const tot=(pagoArr[m-1]||0)+(pendArr[m-1]||0);
+      return `<div style="background:var(--card);padding:1.2rem;border:1px solid var(--b2);cursor:pointer" onclick="document.getElementById('dash-mes').value=${m};renderDash()">
+        <div style="font-family:Cinzel,serif;font-size:.65rem;letter-spacing:.2em;color:var(--txt3);margin-bottom:.5rem">${mesNomes[m-1]}</div>
+        <div style="font-family:Cinzel,serif;font-size:1rem;color:var(--gold)">${fmtM(tot)}</div>
+        <div style="font-size:.7rem;color:var(--green);margin-top:.2rem">✓ ${fmtM(pagoArr[m-1]||0)}</div>
       </div>`;
-    }).join('') : '<div class="empty"><div class="ei">📄</div><p>Nenhuma fatura ainda</p></div>';
-  }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
+    }).join('')}
+  </div>`;
 }
 
 // ── CLIENTES ──────────────────────────────────────────────────
