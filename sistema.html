@@ -567,19 +567,19 @@ async function goTo(page){
 // ── DASHBOARD ─────────────────────────────────────────────────
 let chartCat = null, chartStatus = null;
 
+let dashInited = false;
 function initDashSelects(){
+  if(dashInited) return;
+  dashInited = true;
   const now = new Date();
   const anoSel = document.getElementById('dash-ano');
-  if(anoSel && anoSel.options.length === 0){
-    for(let a = now.getFullYear()-2; a <= now.getFullYear()+1; a++){
-      const o = document.createElement('option');
-      o.value = a; o.textContent = a;
-      if(a === now.getFullYear()) o.selected = true;
-      anoSel.appendChild(o);
-    }
+  for(let a = now.getFullYear()-2; a <= now.getFullYear()+1; a++){
+    const o = document.createElement('option');
+    o.value = a; o.textContent = a;
+    if(a === now.getFullYear()) o.selected = true;
+    anoSel.appendChild(o);
   }
-  const mesSel = document.getElementById('dash-mes');
-  if(mesSel) mesSel.value = now.getMonth()+1;
+  document.getElementById('dash-mes').value = now.getMonth()+1;
 }
 
 async function renderDash(){
