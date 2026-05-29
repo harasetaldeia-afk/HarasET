@@ -323,7 +323,7 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--txt)}
         <p style="font-size:.75rem;color:var(--txt3);margin-bottom:.3rem"><strong style="color:var(--gold)">Clientes:</strong> id · nome · doc · tel · email · cidade · uf · obs · criadoEm</p>
         <p style="font-size:.75rem;color:var(--txt3);margin-bottom:.3rem"><strong style="color:var(--gold)">Faturas:</strong> id · num · clienteId · emissao · vencimento · forma · total · obs · status · pagData · pagForma · pagObs · criadoEm</p>
         <p style="font-size:.75rem;color:var(--txt3);margin-bottom:.3rem"><strong style="color:var(--gold)">Itens:</strong> id · faturaId · desc · qty · price · total</p>
-        <p style="font-size:.75rem;color:var(--txt3)"><strong style="color:var(--gold)">Animais:</strong> id · clienteId · animal1 · cat1 · animal2 · cat2 · animal3 · cat3 · animal4 · cat4 · diaVenc</p>
+        <p style="font-size:.75rem;color:var(--txt3)"><strong style="color:var(--gold)">Clientes (completo):</strong> id · nome · doc · tel · email · cidade · uf · obs · diaVenc · animal1 · cat1 · animal2 · cat2 · animal3 · cat3 · animal4 · cat4 · criadoEm</p>
       </div>
     </div>
 
@@ -416,8 +416,8 @@ const CATS = { 'Baia Nova': 550, 'Baia Antiga': 425, 'Piquete': 370 };
 const PIX_CHAVE = '07209729496';
 const PIX_NOME  = 'Haras ET';
 
-// Cache
-let DB = { clientes:[], faturas:[], animais:[] };
+// Cache - animais agora ficam dentro do proprio cliente
+let DB = { clientes:[], faturas:[] };
 let animalRowCount = 0;
 
 // ── LOGIN ────────────────────────────────────────────────────
@@ -519,18 +519,19 @@ function catBadge(cat){
   return `<span class="cat-badge ${cls}">${cat}</span>`;
 }
 function getAnimaisCliente(cid){
-  return DB.animais.find(a=>String(a.clienteId)===String(cid));
+  // Animais agora ficam direto no objeto cliente
+  return DB.clientes.find(c=>String(c.id)===String(cid));
 }
-function calcTotal(anim){
-  if(!anim) return 0;
+function calcTotal(cli){
+  if(!cli) return 0;
   let t=0;
-  for(let i=1;i<=4;i++){ const cat=anim['cat'+i]; if(cat&&CATS[cat]) t+=CATS[cat]; }
+  for(let i=1;i<=4;i++){ const cat=cli['cat'+i]; if(cat&&CATS[cat]) t+=CATS[cat]; }
   return t;
 }
-function animaisDesc(anim){
-  if(!anim) return '—';
+function animaisDesc(cli){
+  if(!cli) return '—';
   const parts=[];
-  for(let i=1;i<=4;i++){ if(anim['animal'+i]) parts.push(anim['animal'+i]+' ('+anim['cat'+i]+')'); }
+  for(let i=1;i<=4;i++){ if(cli['animal'+i]) parts.push(cli['animal'+i]+' ('+cli['cat'+i]+')'); }
   return parts.join(', ')||'—';
 }
 
@@ -538,8 +539,8 @@ function animaisDesc(anim){
 async function loadClientes(q=''){
   loading('Carregando clientes...');
   try{
-    const [cl,an] = await Promise.all([api('listar','Clientes'), api('listar','Animais')]);
-    DB.clientes=cl; DB.animais=an; hideLoad(); renderClientes(q);
+    const cl = await api('listar','Clientes');
+    DB.clientes=cl; hideLoad(); renderClientes(q);
   }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
 }
 function renderClientes(q=''){
@@ -549,9 +550,8 @@ function renderClientes(q=''){
   if(!list.length){ tb.innerHTML=''; em.style.display='block'; return; }
   em.style.display='none';
   tb.innerHTML=list.map(c=>{
-    const an=getAnimaisCliente(c.id);
-    const total=calcTotal(an);
-    const nAnimais=an?[1,2,3,4].filter(i=>an['animal'+i]).length:0;
+    const total=calcTotal(c);
+    const nAnimais=[1,2,3,4].filter(i=>c['animal'+i]).length;
     return `<tr>
       <td>${c.nome||'—'}</td>
       <td>${c.tel||'—'}</td>
@@ -589,17 +589,17 @@ async function salvarCliente(){
   let tel=document.getElementById('c-tel').value.replace(/[^0-9]/g,'');
   if(tel.length>11&&tel.startsWith('55')) tel=tel.slice(2);
   const dados={nome,tel,doc:document.getElementById('c-doc').value,email:'',cidade:document.getElementById('c-cidade').value,uf:document.getElementById('c-uf').value,obs:''};
+  // Inclui animais direto no cliente
+  dados.diaVenc = document.getElementById('c-diavenc').value;
+  for(let i=1;i<=4;i++){ dados['animal'+i]=''; dados['cat'+i]=''; }
+  for(let i=1;i<=animalRowCount;i++){
+    const ne=document.getElementById('an-nome-'+i);
+    const ce=document.getElementById('an-cat-'+i);
+    if(ne&&ce&&i<=4){ dados['animal'+i]=ne.value; dados['cat'+i]=ce.value; }
+  }
   loading('Salvando...');
   try{
-    const saved=await api('inserir','Clientes',dados);
-    // Salvar animais
-    const animDados={clienteId:saved.id,diaVenc:document.getElementById('c-diavenc').value};
-    for(let i=1;i<=animalRowCount;i++){
-      const ne=document.getElementById('an-nome-'+i);
-      const ce=document.getElementById('an-cat-'+i);
-      if(ne&&ce){ animDados['animal'+i]=ne.value; animDados['cat'+i]=ce.value; }
-    }
-    await api('inserir','Animais',animDados);
+    await api('inserir','Clientes',dados);
     hideLoad(); closeModal('m-cli'); toast('Cliente salvo!'); loadClientes();
     // Reset form
     ['c-nome','c-tel','c-doc','c-cidade'].forEach(id=>document.getElementById(id).value='');
@@ -609,20 +609,19 @@ async function salvarCliente(){
 
 function editCliente(id){
   const c=DB.clientes.find(x=>x.id===id); if(!c) return;
-  const an=getAnimaisCliente(id);
   document.getElementById('ec-id').value=id;
-  document.getElementById('ec-anim-id').value=an?an.id:'';
+  // animais agora no proprio cliente
   document.getElementById('ec-nome').value=c.nome||'';
   document.getElementById('ec-tel').value=c.tel||'';
   document.getElementById('ec-doc').value=c.doc||'';
   document.getElementById('ec-cidade').value=c.cidade||'';
   document.getElementById('ec-uf').value=c.uf||'';
-  document.getElementById('ec-diavenc').value=an?an.diaVenc:'10';
-  // Animais
+  document.getElementById('ec-diavenc').value=c.diaVenc||'10';
+  // Animais direto do cliente
   const af=document.getElementById('animais-edit-form'); af.innerHTML='';
   animalRowCount=0;
   for(let i=1;i<=4;i++){
-    if(an&&an['animal'+i]){ animalRowCount++; buildAnimalRow('animais-edit-form',animalRowCount,an['animal'+i],an['cat'+i]); }
+    if(c['animal'+i]){ animalRowCount++; buildAnimalRow('animais-edit-form',animalRowCount,c['animal'+i],c['cat'+i]); }
   }
   openModal('m-edit-cli');
 }
@@ -634,17 +633,17 @@ async function salvarEdicaoCliente(){
   let tel=document.getElementById('ec-tel').value.replace(/[^0-9]/g,'');
   if(tel.length>11&&tel.startsWith('55')) tel=tel.slice(2);
   const dados={id,nome:document.getElementById('ec-nome').value,tel,doc:document.getElementById('ec-doc').value,cidade:document.getElementById('ec-cidade').value,uf:document.getElementById('ec-uf').value};
+  // Inclui animais direto no cliente
+  dados.diaVenc = document.getElementById('ec-diavenc').value;
+  for(let i=1;i<=4;i++){ dados['animal'+i]=''; dados['cat'+i]=''; }
+  for(let i=1;i<=animalRowCount;i++){
+    const ne=document.getElementById('an-nome-'+i);
+    const ce=document.getElementById('an-cat-'+i);
+    if(ne&&ce&&i<=4){ dados['animal'+i]=ne.value; dados['cat'+i]=ce.value; }
+  }
   loading('Atualizando...');
   try{
     await api('atualizar','Clientes',dados);
-    const animDados={id:animId||undefined,clienteId:id,diaVenc:document.getElementById('ec-diavenc').value,animal1:'',cat1:'',animal2:'',cat2:'',animal3:'',cat3:'',animal4:'',cat4:''};
-    for(let i=1;i<=animalRowCount;i++){
-      const ne=document.getElementById('an-nome-'+i);
-      const ce=document.getElementById('an-cat-'+i);
-      if(ne&&ce){ animDados['animal'+i]=ne.value; animDados['cat'+i]=ce.value; }
-    }
-    if(animId){ await api('atualizar','Animais',animDados); }
-    else { await api('inserir','Animais',animDados); }
     hideLoad(); closeModal('m-edit-cli'); toast('Atualizado!'); loadClientes();
   }catch(e){ hideLoad(); toast('Erro: '+e.message,'err'); }
 }
@@ -704,8 +703,8 @@ let iCount=0;
 async function initNova(){
   if(!DB.clientes.length){
     loading('Carregando...');
-    const [cl,an]=await Promise.all([api('listar','Clientes'),api('listar','Animais')]);
-    DB.clientes=cl; DB.animais=an; hideLoad();
+    DB.clientes=await api('listar','Clientes');
+    hideLoad();
   }
   const sel=document.getElementById('f-cli');
   sel.innerHTML='<option value="">Selecionar...</option>';
@@ -720,22 +719,21 @@ async function initNova(){
 function preencherAnimais(){
   const cid=document.getElementById('f-cli').value;
   if(!cid) return;
-  const an=getAnimaisCliente(cid);
   const c=DB.clientes.find(x=>x.id===cid);
   document.getElementById('items-body').innerHTML='';
   iCount=0;
-  if(an){
-    // Set vencimento based on diaVenc
-    if(an.diaVenc){
-      const d=new Date(); d.setDate(parseInt(an.diaVenc));
-      if(d<new Date()) d.setMonth(d.getMonth()+1);
+  if(c){
+    // Vencimento pelo diaVenc do cliente
+    if(c.diaVenc){
+      const d=new Date(); d.setDate(parseInt(c.diaVenc));
+      if(d<=new Date()) d.setMonth(d.getMonth()+1);
       document.getElementById('f-venc').value=d.toISOString().split('T')[0];
     }
     for(let i=1;i<=4;i++){
-      if(an['animal'+i]&&an['cat'+i]&&CATS[an['cat'+i]]){
+      if(c['animal'+i]&&c['cat'+i]&&CATS[c['cat'+i]]){
         iCount++;
         const tr=document.createElement('tr'); tr.id='ir-'+iCount;
-        tr.innerHTML=buildItemRow(iCount, an['animal'+i]+' — '+an['cat'+i], 1, CATS[an['cat'+i]]);
+        tr.innerHTML=buildItemRow(iCount, c['animal'+i]+' — '+c['cat'+i], 1, CATS[c['cat'+i]]);
         document.getElementById('items-body').appendChild(tr);
       }
     }
@@ -821,8 +819,8 @@ async function gerarFaturaCliente(cid){
 async function initLote(){
   if(!DB.clientes.length){
     loading('Carregando...');
-    const [cl,an]=await Promise.all([api('listar','Clientes'),api('listar','Animais')]);
-    DB.clientes=cl; DB.animais=an; hideLoad();
+    DB.clientes=await api('listar','Clientes');
+    hideLoad();
   }
   // Default mes = proximo mes
   const d=new Date(); d.setMonth(d.getMonth()+1);
@@ -831,12 +829,11 @@ async function initLote(){
 }
 function renderLoteLista(){
   const container=document.getElementById('lote-lista');
-  const comAnimais=DB.clientes.filter(c=>{ const an=getAnimaisCliente(c.id); return an&&calcTotal(an)>0; });
+  const comAnimais=DB.clientes.filter(c=>calcTotal(c)>0);
   if(!comAnimais.length){ container.innerHTML='<div class="empty"><div class="ei">👤</div><p>Nenhum cliente com animais cadastrados</p></div>'; return; }
   container.innerHTML=comAnimais.map(c=>{
-    const an=getAnimaisCliente(c.id);
-    const total=calcTotal(an);
-    const desc=animaisDesc(an);
+    const total=calcTotal(c);
+    const desc=animaisDesc(c);
     return `<div class="lote-cli sel" id="lc-${c.id}" onclick="toggleLote('${c.id}')">
       <input type="checkbox" checked id="chk-${c.id}" onclick="event.stopPropagation();toggleLote('${c.id}')"/>
       <div class="lc-info"><h4>${c.nome}</h4><p>${desc}</p></div>
@@ -867,7 +864,7 @@ async function gerarLote(){
     const cid=el.id.replace('lc-','');
     const c=DB.clientes.find(x=>x.id===cid);
     const an=getAnimaisCliente(cid);
-    if(c&&an) selecionados.push({c,an});
+    if(c&&calcTotal(c)>0) selecionados.push({c});
   });
   if(!selecionados.length){ toast('Selecione ao menos um cliente','err'); return; }
   const [ano,mesN]=mes.split('-');
@@ -877,12 +874,12 @@ async function gerarLote(){
   // Precisamos do form de nova fatura
   document.getElementById('f-emissao')||await goTo('nova');
   let ok=0, erros=0;
-  for(const {c,an} of selecionados){
+  for(const {c} of selecionados){
     try{
       const items=[];
       for(let i=1;i<=4;i++){
-        if(an['animal'+i]&&an['cat'+i]&&CATS[an['cat'+i]]){
-          items.push({desc:an['animal'+i]+' — '+an['cat'+i],qty:1,price:CATS[an['cat'+i]],total:CATS[an['cat'+i]]});
+        if(c['animal'+i]&&c['cat'+i]&&CATS[c['cat'+i]]){
+          items.push({desc:c['animal'+i]+' — '+c['cat'+i],qty:1,price:CATS[c['cat'+i]],total:CATS[c['cat'+i]]});
         }
       }
       if(!items.length) continue;
@@ -1034,7 +1031,7 @@ async function seedClientes(){
   const st=document.getElementById('seed-st');
   st.textContent='Importando...'; let ok=0;
   for(const c of lista){
-    try{ await api('inserir','Clientes',{...c,doc:'',email:'',obs:''}); ok++; st.textContent=ok+'/'+lista.length+'...'; }
+    try{ await api('inserir','Clientes',{...c,doc:'',email:'',obs:'',diaVenc:'10',animal1:'',cat1:'',animal2:'',cat2:'',animal3:'',cat3:'',animal4:'',cat4:''}); ok++; st.textContent=ok+'/'+lista.length+'...'; }
     catch(e){ console.warn(e); }
   }
   st.textContent='✅ '+ok+' importados!'; toast('Clientes importados!');
