@@ -141,6 +141,28 @@ body{background:var(--bg);color:var(--txt);font-family:'Lato',sans-serif;font-we
   .portal-content{padding:1.2rem 1rem}
 }
 
+/* App install buttons */
+.app-btns { margin-top:1.5rem; text-align:center; }
+.app-btns-title { font-family:'Cinzel',serif; font-size:.58rem; letter-spacing:.3em; color:var(--txt3); text-transform:uppercase; margin-bottom:.8rem; }
+.app-btns-row { display:flex; gap:.8rem; }
+.app-btn { flex:1; display:flex; align-items:center; justify-content:center; gap:.5rem; padding:.85rem 1rem; border:none; cursor:pointer; font-family:'Cinzel',serif; font-size:.62rem; letter-spacing:.12em; transition:all .2s; }
+.app-btn.android { background:rgba(46,204,113,.12); color:#2ecc71; border:1px solid rgba(46,204,113,.3); }
+.app-btn.android:hover { background:rgba(46,204,113,.22); }
+.app-btn.ios { background:rgba(201,168,76,.1); color:var(--gold); border:1px solid rgba(201,168,76,.25); }
+.app-btn.ios:hover { background:rgba(201,168,76,.2); }
+.app-btn.hidden { display:none; }
+
+/* iOS modal */
+.ios-modal { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:999; display:none; align-items:flex-end; justify-content:center; padding:1rem; }
+.ios-modal.show { display:flex; }
+.ios-box { background:var(--bg2); border:1px solid var(--border); padding:2rem; width:100%; max-width:400px; margin-bottom:env(safe-area-inset-bottom); }
+.ios-box h3 { font-family:'Cinzel',serif; font-size:.9rem; letter-spacing:.15em; color:var(--gold); margin-bottom:1.2rem; }
+.ios-step { display:flex; align-items:flex-start; gap:1rem; margin-bottom:1rem; }
+.ios-step-num { background:var(--gold); color:var(--bg); font-family:'Cinzel',serif; font-size:.7rem; font-weight:700; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:.1rem; }
+.ios-step p { font-size:.82rem; color:var(--txt2); line-height:1.6; }
+.ios-step p strong { color:var(--txt); }
+.ios-step .ios-icon { font-size:1.1rem; }
+
 /* iOS safe area */
 body { padding-top: env(safe-area-inset-top); }
 #login-screen { padding-top: calc(1.5rem + env(safe-area-inset-top)); }
@@ -170,6 +192,30 @@ body { padding-top: env(safe-area-inset-top); }
 </head>
 <body>
 
+<!-- iOS Install Modal -->
+<div class="ios-modal" id="ios-modal" onclick="if(event.target===this)fecharIOSModal()">
+  <div class="ios-box">
+    <h3>Instalar no iPhone</h3>
+    <div class="ios-step">
+      <div class="ios-step-num">1</div>
+      <p>Toque no ícone de compartilhar <strong class="ios-icon">⬆️</strong> na barra inferior do <strong>Safari</strong></p>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">2</div>
+      <p>Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong></p>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">3</div>
+      <p>Toque em <strong>"Adicionar"</strong> no canto superior direito</p>
+    </div>
+    <div class="ios-step">
+      <div class="ios-step-num">4</div>
+      <p>O ícone do <strong>Haras ET</strong> aparecerá na sua tela inicial 🐴</p>
+    </div>
+    <button style="width:100%;margin-top:1rem;background:var(--gold);color:var(--bg);font-family:Cinzel,serif;font-size:.72rem;letter-spacing:.2em;padding:.9rem;border:none;cursor:pointer;font-weight:700" onclick="fecharIOSModal()">Entendido</button>
+  </div>
+</div>
+
 <!-- Install Banner -->
 <div id="install-banner">
   <p>📱 <strong>Instalar Haras ET</strong><br>Adicione o app na sua tela inicial para acesso rápido às suas faturas.</p>
@@ -195,6 +241,21 @@ body { padding-top: env(safe-area-inset-top); }
       <button class="login-btn" onclick="entrar()">Acessar Minhas Faturas</button>
       <div class="login-error" id="login-error">Código de acesso inválido.</div>
       <p class="login-hint">Código fornecido pelo Haras ET</p>
+    </div>
+
+    <!-- App install buttons -->
+    <div class="app-btns">
+      <p class="app-btns-title">Instalar como App</p>
+      <div class="app-btns-row">
+        <button class="app-btn android" onclick="instalarAndroid()" id="btn-android">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341a.75.75 0 01-.75.75H7.227a.75.75 0 01-.75-.75V9.5h11.046v5.841zM7.5 7.25a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM6 3.5L4.5 1.25M18 3.5l1.5-2.25M8.25 1.25h7.5"/><path d="M3 9.5C3 7.015 5.015 5 7.5 5h9C18.985 5 21 7.015 21 9.5v6c0 2.485-2.015 4.5-4.5 4.5h-9C5.015 20 3 17.985 3 15.5v-6z"/></svg>
+          <span>Android</span>
+        </button>
+        <button class="app-btn ios" onclick="instalarIOS()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          <span>iPhone / iPad</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -536,16 +597,30 @@ window.addEventListener('beforeinstallprompt', e => {
 
 function instalarApp(){
   fecharBanner();
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(r => {
-      if(r.outcome === 'accepted') toast('App instalado!');
-      deferredPrompt = null;
-    });
-  } else {
-    // iOS instructions
-    showIOSInstructions();
+  if(deferredPrompt){ dispararPrompt(); }
+  else { showIOSModal(); }
+}
+
+function instalarAndroid(){
+  if(deferredPrompt){ dispararPrompt(); }
+  else {
+    const isAndroid = /android/i.test(navigator.userAgent);
+    if(isAndroid){
+      toast('Abra no Chrome e toque em ⋮ → "Adicionar à tela inicial"');
+    } else {
+      toast('Use o Chrome no Android para instalar');
+    }
   }
+}
+
+function instalarIOS(){ showIOSModal(); }
+
+function dispararPrompt(){
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r => {
+    if(r.outcome === 'accepted') toast('App instalado! 🎉');
+    deferredPrompt = null;
+  });
 }
 
 function fecharBanner(){
@@ -553,11 +628,47 @@ function fecharBanner(){
   localStorage.setItem('pwa-dismissed','1');
 }
 
-function showIOSInstructions(){
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  if(isIOS){
-    alert('Para instalar no iPhone:\n\n1. Toque no ícone de compartilhar (□↑) na barra do Safari\n2. Role pra baixo e toque em "Adicionar à Tela de Início"\n3. Toque em "Adicionar"');
-  }
+function showIOSModal(){
+  document.getElementById('ios-modal').classList.add('show');
+}
+function fecharIOSModal(){
+  document.getElementById('ios-modal').classList.remove('show');
+}
+
+function showIOSInstructions(){ showIOSModal(); }
+
+function copiarLink(){
+  const url = window.location.href;
+  navigator.clipboard.writeText(url)
+    .then(()=>toast('Link copiado! Cole no Safari 🧭'))
+    .catch(()=>{ prompt('Copie este link e abra no Safari:', url); });
+}
+
+function abrirNoSafari(){
+  const url = window.location.href;
+  // Tenta abrir no Safari via deep link
+  // Remove o protocolo e monta o scheme do Safari
+  const urlSemProtocol = url.replace('https://','').replace('http://','');
+
+  // Tenta x-web-search (atalho Safari iOS)
+  const safariLink = document.createElement('a');
+  safariLink.href = 'x-web-search://?google=' + encodeURIComponent(url);
+  safariLink.click();
+
+  // Fallback após 500ms: tenta opener do Safari
+  setTimeout(()=>{
+    try {
+      // Tenta abrir via location
+      window.location.href = 'safari-https://' + urlSemProtocol;
+    } catch(e){}
+  }, 500);
+
+  // Fallback final após 1s: copia o link
+  setTimeout(()=>{
+    navigator.clipboard.writeText(url)
+      .then(()=> toast('Não foi possível abrir o Safari automaticamente. Link copiado — cole no Safari!'))
+      .catch(()=> prompt('Cole este link no Safari:', url));
+  }, 1000);
 }
 
 // Detect if already installed
@@ -565,6 +676,17 @@ window.addEventListener('appinstalled', () => {
   toast('App instalado com sucesso! 🎉');
   deferredPrompt = null;
 });
+
+// Show android button when prompt is ready
+window.addEventListener('beforeinstallprompt', e => {
+  document.getElementById('btn-android').textContent = '';
+  document.getElementById('btn-android').innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zm-2.5-1C2.67 17 2 17.67 2 18.5v-9C2 8.67 2.67 8 3.5 8S5 8.67 5 9.5v9c0 .83-.67 1.5-1.5 1.5zm17 0c-.83 0-1.5-.67-1.5-1.5v-9c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5zm-4.5-15L17.5 1l-1.5-1.5L14.5 1 13 2.5 11.5 1 10 2.5 8.5 1 7 2.5V4H17V2.5L15.5 1z"/></svg><span>Android</span>';
+});
+
+// Hide android btn if already installed (standalone mode)
+if(window.matchMedia('(display-mode: standalone)').matches){
+  document.querySelectorAll('.app-btns').forEach(el=>el.style.display='none');
+}
 </script>
 </body>
 </html>
